@@ -10,11 +10,11 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: module name here
-      url: /core
+      title: Analyse Model Confidence
+      url: /classification-interpretation
     - output: web,pdf
-      title: Title
-      url: /02-compare-models
+      title: Compare Models
+      url: /compare-models
     output: web
     title: fastai2_extensions
   output: web

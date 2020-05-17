@@ -1,7 +1,7 @@
 {
   "fastai2_extensions": {
     "Overview": "/",
-    "module name here": "/core",
-    "Title": "/02-compare-models"
+    "Analyse Model Confidence": "/classification-interpretation",
+    "Compare Models": "/compare-models"
   }
 }
