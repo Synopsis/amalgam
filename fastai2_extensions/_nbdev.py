@@ -6,7 +6,7 @@ index = {"ClassificationInterpretationEx": "01-classification-interpretation.ipy
          "intersection": "02-compare-models.ipynb",
          "compare_venn": "02-compare-models.ipynb"}
 
-modules = ["interpret.py",
+modules = ["interpret/interpret.py",
            "interpret/compare.py"]
 
 doc_url = "https://rsomani95.github.io/fastai2_extensions/"
