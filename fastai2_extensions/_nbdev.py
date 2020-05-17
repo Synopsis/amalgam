@@ -2,7 +2,9 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"ClassificationInterpretationEx": "01-classification-interpretation.ipynb"}
+index = {"ClassificationInterpretationEx": "01-classification-interpretation.ipynb",
+         "intersection": "02-compare-models.ipynb",
+         "compare_venn": "02-compare-models.ipynb"}
 
 modules = ["interpret.py",
            "interpret/compare.py"]
