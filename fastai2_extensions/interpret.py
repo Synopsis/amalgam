@@ -45,7 +45,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
                               title='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
                               accurate_color='mediumseagreen', inaccurate_color='tomato'):
         'Plot label confidence histograms for each label'
-        if not self.preds_df_each: self.compute_label_confidence()
+        if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
         fig, axes = plt.subplots(nrows = len(self.preds_df_each.keys()), ncols=2,
                                  figsize = (fig_width, fig_height_base * len(self.dl.vocab)))
         for i, (label, df) in enumerate(self.preds_df_each.items()):
@@ -58,3 +58,23 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         fig.suptitle(title)
         plt.subplots_adjust(top = 0.9, bottom=0.01, hspace=0.25, wspace=0.2)
         if return_fig: return fig
+
+    def get_fnames(self, label:str,
+                   mode:Union['accurate', 'inaccurate'],
+                   conf_level:Union[int,float,tuple]) -> np.ndarray:
+        """
+        Utility function to grab filenames of a particular label `label` that were classified
+        as per `mode` (accurate|inaccurate).
+        These filenames are filtered by `conf_level` which can be above or below a certain
+        threshold (above if `mode` == 'accurate' else below), or in confidence ranges
+        """
+        assert label in self.dl.vocab
+        if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
+        df = self.preds_df_each[label][mode].copy()
+        if mode == 'accurate':
+            if isinstance(conf_level, tuple):       filt = df[label].between(*conf_level)
+            if isinstance(conf_level, (int,float)): filt = df[label] > conf_level
+        if mode == 'inaccurate':
+            if isinstance(conf_level, tuple):       filt = df[label].between(*conf_level)
+            if isinstance(conf_level, (int,float)): filt = df[label] < conf_level
+        return df[filt].fname.values

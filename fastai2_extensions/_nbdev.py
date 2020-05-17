@@ -4,7 +4,8 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"ClassificationInterpretationEx": "01-classification-interpretation.ipynb"}
 
-modules = ["interpret.py"]
+modules = ["interpret.py",
+           "interpret/compare.py"]
 
 doc_url = "https://rsomani95.github.io/fastai2_extensions/"
 
