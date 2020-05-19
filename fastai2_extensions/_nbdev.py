@@ -5,19 +5,19 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 index = {"ClassificationInterpretationEx": "01_classification-interpretation.ipynb",
          "intersection": "02_compare-models.ipynb",
          "compare_venn": "02_compare-models.ipynb",
-         "Hook": "gradcam.ipynb",
-         "HookBwd": "gradcam.ipynb",
-         "create_test_img": "gradcam.ipynb",
-         "compute_gcam_items": "gradcam.ipynb",
-         "compute_gcam_map": "gradcam.ipynb",
-         "plt_decoded": "gradcam.ipynb",
-         "plot_gcam": "gradcam.ipynb",
-         "GradCam": "gradcam.ipynb",
-         "PathLike": "gradcam.ipynb"}
+         "Hook": "03_gradcam.ipynb",
+         "HookBwd": "03_gradcam.ipynb",
+         "create_test_img": "03_gradcam.ipynb",
+         "compute_gcam_items": "03_gradcam.ipynb",
+         "compute_gcam_map": "03_gradcam.ipynb",
+         "plt_decoded": "03_gradcam.ipynb",
+         "plot_gcam": "03_gradcam.ipynb",
+         "GradCam": "03_gradcam.ipynb",
+         "PathLike": "03_gradcam.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
-           "gradcam.py"]
+           "interpret/gradcam.py"]
 
 doc_url = "https://rsomani95.github.io/fastai2_extensions/"
 
