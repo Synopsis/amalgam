@@ -61,6 +61,30 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         plt.subplots_adjust(top = 0.9, bottom=0.01, hspace=0.25, wspace=0.2)
         if return_fig: return fig
 
+
+    def plot_accuracy(self, width=0.5, figsize=(6,6), return_fig=False,
+                      title='Accuracy Per Label', ylabel='Accuracy (%)',
+                      color='steelblue'):
+        'Plot a bar plot showing accuracy per label'
+        if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
+        self.accuracy_dict = defaultdict()
+
+        for label,df in self.preds_df_each.items():
+            total = len(df['accurate']) + len(df['inaccurate'])
+            self.accuracy_dict[label] = 100 * len(df['accurate']) / total
+
+        fig,ax = plt.subplots(figsize=figsize)
+
+        x = self.accuracy_dict.keys()
+        y = [v for k,v in self.accuracy_dict.items()]
+
+        ax.bar(x,y,width,color=color)
+        ax.set_ybound(lower=0, upper=100)
+        ax.set_yticks(np.arange(0,110,10))
+        ax.set_ylabel(ylabel)
+        plt.suptitle(title)
+        if return_fig: return fig
+
     def get_fnames(self, label:str,
                    mode:('accurate','inaccurate'),
                    conf_level:Union[int,float,tuple]) -> np.ndarray:
