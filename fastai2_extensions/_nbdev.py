@@ -13,11 +13,20 @@ index = {"ClassificationInterpretationEx": "01_classification-interpretation.ipy
          "plt_decoded": "03_gradcam.ipynb",
          "plot_gcam": "03_gradcam.ipynb",
          "GradCam": "03_gradcam.ipynb",
-         "PathLike": "03_gradcam.ipynb"}
+         "PathLike": "04_export-to-other-frameworks.ipynb",
+         "to_cuda": "04_export-to-other-frameworks.ipynb",
+         "preprocess_one": "04_export-to-other-frameworks.ipynb",
+         "preprocess_batch": "04_export-to-other-frameworks.ipynb",
+         "open_image": "04_export-to-other-frameworks.ipynb",
+         "torch_to_onnx": "04_export-to-other-frameworks.ipynb",
+         "torch_to_numpy": "04_export-to-other-frameworks.ipynb",
+         "onnx_to_tf": "04_export-to-other-frameworks.ipynb",
+         "get_nn_spec": "04_export-to-other-frameworks.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
-           "interpret/gradcam.py"]
+           "interpret/gradcam.py",
+           "inference/export.py"]
 
 doc_url = "https://rsomani95.github.io/fastai2_extensions/"
 
