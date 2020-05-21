@@ -43,18 +43,35 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.preds_df_each[label]['inaccurate'] = sort_desc(self.preds_df_each[label]['inaccurate'], label)
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
 
-    def plot_label_confidence(self, bins=10, fig_width=12, fig_height_base=4, return_fig=False,
-                              title='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
+    def plot_label_confidence(self, bins:int=10, fig_width:int=12, fig_height_base:int=4,
+                              title:str='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
+                              return_fig:bool=False, label_bins:bool=True,
                               accurate_color='mediumseagreen', inaccurate_color='tomato'):
         'Plot label confidence histograms for each label'
         if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
         fig, axes = plt.subplots(nrows = len(self.preds_df_each.keys()), ncols=2,
                                  figsize = (fig_width, fig_height_base * len(self.dl.vocab)))
         for i, (label, df) in enumerate(self.preds_df_each.items()):
+            height=0
+            # find max height
+            for mode in ['inaccurate', 'accurate']:
+                len_bins,_ = np.histogram(df[mode][label], bins=10)
+                if len_bins.max() > height: height=len_bins.max()
+
             for mode,ax in zip(['inaccurate', 'accurate'], axes[i]):
                 range_ = (50,100) if mode == 'accurate' else (0,50)
                 color  = accurate_color if mode == 'accurate' else inaccurate_color
-                ax.hist(df[mode][label], bins=bins, range=range_, rwidth=.95, color=color)
+                num,_,patches = ax.hist(df[mode][label], bins=bins, range=range_, rwidth=.95, color=color)
+                if label_bins:
+                    for rect in patches:
+                        ht = rect.get_height()
+                        ax.annotate(s  = f"{int(ht) if ht > 0 else ''}",
+                            xy = (rect.get_x() + rect.get_width()/2, ht),
+                            xytext = (0,3), # offset vertically by 3 points
+                            textcoords = 'offset points',
+                            ha = 'center', va = 'bottom'
+                           )
+                ax.set_ybound(upper=height + height*0.3)
                 ax.set_xlabel(f'{label}: {mode.capitalize()}')
                 ax.set_ylabel(f'No. {mode.capitalize()} = {len(df[mode][label])}')
         fig.suptitle(title)
