@@ -64,7 +64,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
 
     def plot_accuracy(self, width=0.5, figsize=(6,6), return_fig=False,
                       title='Accuracy Per Label', ylabel='Accuracy (%)',
-                      color='steelblue'):
+                      color='steelblue', vertical_labels=False):
         'Plot a bar plot showing accuracy per label'
         if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
         self.accuracy_dict = defaultdict()
@@ -78,10 +78,19 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         x = self.accuracy_dict.keys()
         y = [v for k,v in self.accuracy_dict.items()]
 
-        ax.bar(x,y,width,color=color)
+        rects = ax.bar(x,y,width,color=color)
+        for rect in rects:
+            ht = rect.get_height()
+            ax.annotate(s  = f"{ht:.02f}",
+                        xy = (rect.get_x() + rect.get_width()/2, ht),
+                        xytext = (0,3), # offset vertically by 3 points
+                        textcoords = 'offset points',
+                        ha = 'center', va = 'bottom'
+                       )
         ax.set_ybound(lower=0, upper=100)
         ax.set_yticks(np.arange(0,110,10))
         ax.set_ylabel(ylabel)
+        ax.set_xticklabels(x, rotation='vertical' if vertical_labels else 'horizontal')
         plt.suptitle(title)
         if return_fig: return fig
 
