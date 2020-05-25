@@ -1,7 +1,8 @@
 {
   "fastai2_extensions": {
     "Overview": "/",
-    "Analyse Model Confidence": "/classification-interpretation",
-    "Compare Models": "/compare-models"
+    "Analyse Model Confidence": "/interpret_classification-interpretation",
+    "Compare Models": "/interpret_compare-models",
+    "Title": "/augment_PIL-img_filters"
   }
 }

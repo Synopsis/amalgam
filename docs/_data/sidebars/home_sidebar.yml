@@ -11,10 +11,13 @@ entries:
       url: /
     - output: web,pdf
       title: Analyse Model Confidence
-      url: /classification-interpretation
+      url: /interpret_classification-interpretation
     - output: web,pdf
       title: Compare Models
-      url: /compare-models
+      url: /interpret_compare-models
+    - output: web,pdf
+      title: Title
+      url: /augment_PIL-img_filters
     output: web
     title: fastai2_extensions
   output: web
