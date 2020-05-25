@@ -13,7 +13,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
     """
     def plot_confusion_matrix(interp, normalize=False, title='Confusion matrix', cmap="Blues", norm_dec=2,
-                              plot_txt=True, return_fig=True, **kwargs):
+                              plot_txt=True, return_fig=False, **kwargs):
         """
         Plot the confusion matrix, with `title` and using `cmap`.
         An exact replica of fastai2's method, with the added option
