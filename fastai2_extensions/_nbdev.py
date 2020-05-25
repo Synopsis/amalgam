@@ -21,12 +21,16 @@ index = {"ClassificationInterpretationEx": "01_classification-interpretation.ipy
          "torch_to_onnx": "04_export-to-other-frameworks.ipynb",
          "torch_to_numpy": "04_export-to-other-frameworks.ipynb",
          "onnx_to_tf": "04_export-to-other-frameworks.ipynb",
-         "get_nn_spec": "04_export-to-other-frameworks.ipynb"}
+         "get_nn_spec": "04_export-to-other-frameworks.ipynb",
+         "is_3dlut_row": "05_augment-PIL-img_filters.ipynb",
+         "read_lut": "05_augment-PIL-img_filters.ipynb",
+         "ApplyPILFilter": "05_augment-PIL-img_filters.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
            "interpret/gradcam.py",
-           "inference/export.py"]
+           "inference/export.py",
+           "augment/pil_filters.py"]
 
 doc_url = "https://rsomani95.github.io/fastai2_extensions/"
 
