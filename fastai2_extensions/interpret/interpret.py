@@ -15,6 +15,38 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
     def __init__(self, dl, inputs, preds, targs, decoded, losses):
         store_attr(self, "dl,inputs,preds,targs,decoded,losses")
 
+    def plot_confusion_matrix(interp, normalize=False, title='Confusion matrix', cmap="Blues", norm_dec=2,
+                              plot_txt=True, return_fig=True, **kwargs):
+        """
+        Plot the confusion matrix, with `title` and using `cmap`.
+        An exact replica of fastai2's method, with the added option
+        of `return_fig`, to be able to save the image to disk
+        """
+        # This function is mainly copied from the sklearn docs
+        cm = interp.confusion_matrix()
+        if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        fig = plt.figure(**kwargs)
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        tick_marks = np.arange(len(interp.vocab))
+        plt.xticks(tick_marks, interp.vocab, rotation=90)
+        plt.yticks(tick_marks, interp.vocab, rotation=0)
+
+        if plot_txt:
+            thresh = cm.max() / 2.
+            for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+                coeff = f'{cm[i, j]:.{norm_dec}f}' if normalize else f'{cm[i, j]}'
+                plt.text(j, i, coeff, horizontalalignment="center", verticalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+        ax = fig.gca()
+        ax.set_ylim(len(interp.vocab)-.5,-.5)
+
+        plt.tight_layout()
+        plt.ylabel('Actual')
+        plt.xlabel('Predicted')
+        plt.grid(False)
+        if return_fig: return fig
+
     def compute_label_confidence(self):
         """
         Collate prediction confidence, filenames, and ground truth labels
