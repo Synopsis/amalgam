@@ -4,11 +4,16 @@ __all__ = ['to_cuda', 'preprocess_one', 'preprocess_batch', 'PathLike', 'open_im
            'onnx_to_tf', 'get_nn_spec']
 
 # Cell
+from fastai2.vision.all import *
+
+# Cell
 import torchvision.transforms.functional as TTF
 import torch.nn as nn
 to_cuda = lambda x: x.cuda() if torch.cuda.is_available() else x
 
 # Cell
+from typing import Union,Collection
+
 PathLike = Union[str,Path]
 
 def preprocess_one(fname:PathLike):
