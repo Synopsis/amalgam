@@ -12,9 +12,6 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
     """
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
     """
-    def __init__(self, dl, inputs, preds, targs, decoded, losses):
-        store_attr(self, "dl,inputs,preds,targs,decoded,losses")
-
     def plot_confusion_matrix(interp, normalize=False, title='Confusion matrix', cmap="Blues", norm_dec=2,
                               plot_txt=True, return_fig=True, **kwargs):
         """
