@@ -161,7 +161,7 @@ fig
 
 
 
-### Augmentation
+## Augmentation
 
 `ApplyPILFilter`, not surprisingly, lets you apply one or more `PIL.ImageFilter`s as a data augmentation.
 
@@ -200,11 +200,11 @@ fig
 
 
 
-![png](docs/images/output_23_0.png)
+![png](docs/images/output_24_0.png)
 
 
 
-### Export
+## Export
 
 Convenience wrappers to export to `ONNX`. <br>
 Other frameworks will be added soon.

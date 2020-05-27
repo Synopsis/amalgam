@@ -25,6 +25,6 @@ entries:
       title: ImageFilter Data Augmentation
       url: /augment_PIL-img_filters
     output: web
-    title: fastai2_extensions
+    title: Fastai2 Extensions
   output: web
   title: Sidebar
