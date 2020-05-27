@@ -69,7 +69,7 @@ def plt_decoded(learn, x, ctx):
     return extent
 
 def plot_gcam(img:PILImage, x:tensor, gcam_map:tensor, plt_axis,
-              full_size=True, alpha=0.6,
+              full_size=True, alpha=0.6, learn=None,
               interpolation='bilinear', cmap='magma'):
     'Plot gradcam on `plt_axis`'
     if full_size:
@@ -153,7 +153,7 @@ class GradCam():
                             continue
                     plot_gcam(img=self.img, x=self.x, full_size=full_size,
                               gcam_map=self.gradcams[self.labels[label_idx]],
-                              plt_axis=ax[i,j], alpha=alpha,
+                              plt_axis=ax[i,j], alpha=alpha, learn=self.learn,
                               interpolation=interpolation, cmap=cmap)
                     title = self.labels[label_idx]
                     ax[i][j].set_title(f'{title}, {self.preds_dict[title] * 100:.02f}%')
@@ -175,7 +175,7 @@ class GradCam():
                         continue
                 plot_gcam(img=self.img, x=self.x, full_size=full_size,
                           gcam_map=self.gradcams[self.labels[label_idx]],
-                          plt_axis=ax[i], alpha=alpha,
+                          plt_axis=ax[i], alpha=alpha, learn=self.learn,
                           interpolation=interpolation, cmap=cmap)
                 title = self.labels[label_idx]
                 ax[i].set_title(f'{title}, {self.preds_dict[title] * 100:.02f}%')
