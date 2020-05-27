@@ -137,6 +137,13 @@ def onnx_to_coreml(onnx_path:PathLike,
                    minimum_ios_deployment_target = '11.2',
                    output_path=''
                   ):
+    """
+    Add a custom scaling layer with the `normalise_mean` and
+    `normalise_sdev` stats, do the appropriate preprocessing
+    and export an onnx-model to CoreML.
+
+    Ensure that the `output_path` includes the `.mlmodel` extension
+    """
     assert '.mlmodel' in output_path, f"Include '.mlmodel' file extension in `output_path`"
     # preprocessing arguments
     args = dict(
