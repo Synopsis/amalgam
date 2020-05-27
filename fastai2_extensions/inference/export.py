@@ -100,7 +100,7 @@ def onnx_to_tf(onnx_model:PathLike, output_path:PathLike):
     Simplest wrapper around https://github.com/onnx/onnx-tensorflow/blob/master/example/onnx_to_tf.py
     Ensure `output_path` includes `.pb` as the file extension
     """
-    onnx_model = onnx.load(onnx_model_path)
+    onnx_model = onnx.load(onnx_model)
     tf_rep     = prepare(onnx_model)  # prepare tf representation
     tf_rep.export_graph(output_path)  # export the model
     return tf_rep
