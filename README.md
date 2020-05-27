@@ -59,7 +59,7 @@ There's quite a few plotting options. For more options, see the docs.
 
 ```python
 import PIL
-fname = '../assets/imgs/jojo-rabbit.png'
+fname = '../assets/imgs/alice-in-wonderland.jpg'
 PIL.Image.open(fname).resize((550,270))
 ```
 
