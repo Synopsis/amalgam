@@ -3,6 +3,8 @@
     "Overview": "/",
     "Analyse Model Confidence": "/interpret_classification-interpretation",
     "Compare Models": "/interpret_compare-models",
-    "Title": "/augment_PIL-img_filters"
+    "GradCam": "/interpret_gradcam",
+    "Export To Other Frameworks": "/inference_export-to-other-frameworks",
+    "ImageFilter Data Augmentation": "/augment_PIL-img_filters"
   }
 }

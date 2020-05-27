@@ -1,12 +1,12 @@
 ---
 
-title: Title
+title: Export To Other Frameworks
 
 keywords: fastai
 sidebar: home_sidebar
 
-
-
+summary: "The ONNX exporter works without hiccups. To export to CoreML or TensorFlow, you need to fiddle with different versions of the underlying libraries"
+description: "The ONNX exporter works without hiccups. To export to CoreML or TensorFlow, you need to fiddle with different versions of the underlying libraries"
 ---
 <!--
 
@@ -26,6 +26,59 @@ sidebar: home_sidebar
 
 <div class="output_wrapper">
 <div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/ceil.py:10: The name tf.ceil is deprecated. Please use tf.math.ceil instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/depth_to_space.py:12: The name tf.depth_to_space is deprecated. Please use tf.compat.v1.depth_to_space instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/erf.py:9: The name tf.erf is deprecated. Please use tf.math.erf instead.
+
+WARNING:tensorflow:
+The TensorFlow contrib module will not be included in TensorFlow 2.0.
+For more information, please see:
+  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md
+  * https://github.com/tensorflow/addons
+  * https://github.com/tensorflow/io (for I/O related ops)
+If you depend on functionality not listed there, please file an issue.
+
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/Users/rahulsomani/onnx-tensorflow/onnx_tf/common/__init__.py:89: UserWarning: onnx_tf.common.get_outputs_names is deprecated. It will be removed in future release. Use TensorflowGraph.get_outputs_names instead.
+  warnings.warn(message)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/is_nan.py:9: The name tf.is_nan is deprecated. Please use tf.math.is_nan instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/log.py:10: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/random_normal.py:9: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/random_uniform.py:9: The name tf.random_uniform is deprecated. Please use tf.random.uniform instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/reciprocal.py:10: The name tf.reciprocal is deprecated. Please use tf.math.reciprocal instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/space_to_depth.py:12: The name tf.space_to_depth is deprecated. Please use tf.compat.v1.space_to_depth instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/upsample.py:15: The name tf.image.resize_images is deprecated. Please use tf.image.resize instead.
+
+WARNING:tensorflow:From /Users/rahulsomani/onnx-tensorflow/onnx_tf/handlers/backend/xor.py:10: The name tf.logical_xor is deprecated. Please use tf.math.logical_xor instead.
+
+</pre>
+</div>
+</div>
 
 <div class="output_area">
 
@@ -524,18 +577,6 @@ After much trial and error, what worked for me was installing <code>tensorflow==
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%capture</span>
-<span class="kn">import</span> <span class="nn">onnx_tf</span>
-<span class="kn">from</span> <span class="nn">onnx_tf.backend</span> <span class="kn">import</span> <span class="n">prepare</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
 
 </div>
     {% endraw %}
@@ -558,7 +599,7 @@ After much trial and error, what worked for me was installing <code>tensorflow==
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="onnx_to_tf" class="doc_header"><code>onnx_to_tf</code><a href="https://github.com/rsomani95/fastai2_extensions/tree/master/fastai2_extensions/inference/export.py#L98" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>onnx_to_tf</code>(<strong><code>onnx_model</code></strong>:<code>Union</code>[<code>str</code>, <code>Path</code>], <strong><code>output_path</code></strong>:<code>Union</code>[<code>str</code>, <code>Path</code>])</p>
+<h4 id="onnx_to_tf" class="doc_header"><code>onnx_to_tf</code><a href="https://github.com/rsomani95/fastai2_extensions/tree/master/fastai2_extensions/inference/export.py#L102" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>onnx_to_tf</code>(<strong><code>onnx_model</code></strong>:<code>Union</code>[<code>str</code>, <code>Path</code>], <strong><code>output_path</code></strong>:<code>Union</code>[<code>str</code>, <code>Path</code>])</p>
 </blockquote>
 
 <pre><code>Simplest wrapper around https://github.com/onnx/onnx-tensorflow/blob/master/example/onnx_to_tf.py
@@ -701,7 +742,7 @@ onnx-coreml version: 1.3
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_nn_spec" class="doc_header"><code>get_nn_spec</code><a href="https://github.com/rsomani95/fastai2_extensions/tree/master/fastai2_extensions/inference/export.py#L118" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_nn_spec</code>(<strong><code>spec</code></strong>)</p>
+<h4 id="get_nn_spec" class="doc_header"><code>get_nn_spec</code><a href="https://github.com/rsomani95/fastai2_extensions/tree/master/fastai2_extensions/inference/export.py#L122" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_nn_spec</code>(<strong><code>spec</code></strong>)</p>
 </blockquote>
 
 <pre><code>spec is of type `Model_pb2.Model`, accessed via coreml_model.get_spec()</code></pre>
@@ -793,74 +834,34 @@ onnx-coreml version: 1.3
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">onnx_to_coreml</span><span class="p">(</span><span class="n">onnx_path</span><span class="p">:</span><span class="n">PathLike</span><span class="p">,</span>
-                   <span class="n">normalise_mean</span><span class="p">:</span><span class="n">Collection</span><span class="o">=</span><span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span>
-                   <span class="n">normalise_sdev</span><span class="p">:</span><span class="n">Collection</span><span class="o">=</span><span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">],</span>
-                   <span class="n">is_bgr</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                   <span class="n">mode</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span>
-                   <span class="n">class_labels</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="n">Collection</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                   <span class="n">image_input_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;input_image&#39;</span><span class="p">],</span>
-                   <span class="n">minimum_ios_deployment_target</span> <span class="o">=</span> <span class="s1">&#39;11.2&#39;</span><span class="p">,</span>
-                   <span class="n">output_path</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
-                  <span class="p">):</span>
-    <span class="k">assert</span> <span class="s1">&#39;.mlmodel&#39;</span> <span class="ow">in</span> <span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Include &#39;.mlmodel&#39; file extension in `output_path`&quot;</span>
-    <span class="c1"># preprocessing arguments</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">image_scale</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">255.</span><span class="p">,</span>
-        <span class="n">red_bias</span>    <span class="o">=</span> <span class="o">-</span><span class="n">normalise_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">green_bias</span>  <span class="o">=</span> <span class="o">-</span><span class="n">normalise_mean</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="n">blue_bias</span>   <span class="o">=</span> <span class="o">-</span><span class="n">normalise_mean</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-        <span class="n">is_bgr</span>      <span class="o">=</span> <span class="n">is_bgr</span>
-    <span class="p">)</span>
-    <span class="n">red_sdev</span><span class="p">,</span> <span class="n">green_sdev</span><span class="p">,</span> <span class="n">blue_sdev</span> <span class="o">=</span> <span class="n">normalise_sdev</span>
+</div>
+    {% endraw %}
+
+    {% raw %}
     
-    <span class="c1"># convert onnx model to coreML</span>
-    <span class="n">coreml_model</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">onnx_path</span><span class="p">,</span>
-        <span class="n">mode</span>  <span class="o">=</span> <span class="n">mode</span><span class="p">,</span>
-        <span class="n">class_labels</span> <span class="o">=</span> <span class="n">class_labels</span><span class="p">,</span>
-        <span class="n">image_input_names</span>  <span class="o">=</span> <span class="n">image_input_names</span><span class="p">,</span>
-        <span class="n">preprocessing_args</span> <span class="o">=</span> <span class="n">args</span><span class="p">,</span>
-        <span class="n">minimum_ios_deployment_target</span> <span class="o">=</span> <span class="n">minimum_ios_deployment_target</span>
-    <span class="p">)</span>
-    
-    <span class="c1"># get network spec from model</span>
-    <span class="n">spec</span> <span class="o">=</span> <span class="n">coreml_model</span><span class="o">.</span><span class="n">get_spec</span><span class="p">()</span>
-    <span class="n">nn</span>   <span class="o">=</span> <span class="n">get_nn_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-    
-    <span class="c1"># store away old layers to add back to the reconstructed network</span>
-    <span class="n">old_layers</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="p">[:]</span>
+<div class="cell border-box-sizing code_cell rendered">
 
-    <span class="c1"># names of inputs and outputs of the scaling layer</span>
-    <span class="n">input_name</span>  <span class="o">=</span> <span class="n">old_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">output_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{input_name}</span><span class="s2">_scaled&quot;</span>
+<div class="output_wrapper">
+<div class="output">
 
-    <span class="c1"># create and add scaling layer to new network</span>
-    <span class="n">scale_layer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
-    <span class="n">scale_layer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scale_layer&quot;</span>
-    <span class="n">scale_layer</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">input_name</span><span class="p">)</span>
-    <span class="n">scale_layer</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+<div class="output_area">
 
-    <span class="n">scale_layer</span><span class="o">.</span><span class="n">scale</span><span class="o">.</span><span class="n">scale</span><span class="o">.</span><span class="n">floatValue</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
-        <span class="mi">1</span><span class="o">/</span><span class="n">red_sdev</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">green_sdev</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">blue_sdev</span>
-    <span class="p">])</span>
-    <span class="n">scale_layer</span><span class="o">.</span><span class="n">scale</span><span class="o">.</span><span class="n">shapeScale</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="c1"># add back all the old layers</span>
-    <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">old_layers</span><span class="p">)</span>
-    <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_name</span>
-    
-    <span class="n">coremltools</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved CoreML model to </span><span class="si">{output_path}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">coremltools</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">MLModel</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
-</pre></div>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="onnx_to_coreml" class="doc_header"><code>onnx_to_coreml</code><a href="https://github.com/rsomani95/fastai2_extensions/tree/master/fastai2_extensions/inference/export.py#L130" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>onnx_to_coreml</code>(<strong><code>onnx_path</code></strong>:<code>Union</code>[<code>str</code>, <code>Path</code>], <strong><code>normalise_mean</code></strong>:<code>Collection</code>[<code>T_co</code>]=<em><code>[0.485, 0.456, 0.406]</code></em>, <strong><code>normalise_sdev</code></strong>:<code>Collection</code>[<code>T_co</code>]=<em><code>[0.229, 0.224, 0.225]</code></em>, <strong><code>is_bgr</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>mode</code></strong>:<code>Optional</code>[<code>str</code>]=<em><code>'classifier'</code></em>, <strong><code>class_labels</code></strong>:<code>Optional</code>[<code>Collection</code>[<code>T_co</code>]]=<em><code>None</code></em>, <strong><code>image_input_names</code></strong>=<em><code>['input_image']</code></em>, <strong><code>minimum_ios_deployment_target</code></strong>=<em><code>'11.2'</code></em>, <strong><code>output_path</code></strong>=<em><code>''</code></em>)</p>
+</blockquote>
 
-    </div>
+<pre><code>Add a custom scaling layer with the `normalise_mean` and
+`normalise_sdev` stats, do the appropriate preprocessing
+and export an onnx-model to CoreML.
+
+Ensure that the `output_path` includes the `.mlmodel` extension</code></pre>
+
+</div>
+
+</div>
+
 </div>
 </div>
 
