@@ -59,8 +59,8 @@ There's quite a few plotting options. For more options, see the docs.
 
 ```python
 import PIL
-fname = '../assets/imgs/12-year-a-slave-1.jpg'
-PIL.Image.open(fname).resize((600,270))
+fname = '../assets/imgs/jojo-rabbit.png'
+PIL.Image.open(fname).resize((550,270))
 ```
 
 
@@ -84,23 +84,12 @@ gcam.plot(full_size=True, plot_original=True, figsize=(12,6))
 
 
 ```python
-learn.dls.vocab
-```
-
-
-
-
-    (#2) ['shot_lighting_cast_hard','shot_lighting_cast_soft']
-
-
-
-```python
 gcam = GradCam(learn, fname, ['shot_lighting_cast_hard', 'shot_lighting_cast_soft'])
 gcam.plot(full_size=False, plot_original=False, figsize=(12,4))
 ```
 
 
-![png](docs/images/output_13_0.png)
+![png](docs/images/output_12_0.png)
 
 
 ##### Comparing Multiple Models
@@ -147,7 +136,7 @@ fig
 
 
 
-![png](docs/images/output_17_0.png)
+![png](docs/images/output_16_0.png)
 
 
 
@@ -168,7 +157,7 @@ fig
 
 
 
-![png](docs/images/output_19_0.png)
+![png](docs/images/output_18_0.png)
 
 
 
@@ -186,7 +175,7 @@ from fastai2_extensions.augment.pil_filters import *
 
 ```python
 lut   = read_lut('../assets/luts/2strip.cube')
-fname = '../assets/imgs/12-year-a-slave-1.jpg'
+fname = '../assets/imgs/office-standoff.png'
 
 img_raw  = PILImage.create(fname)
 img_filt = ApplyPILFilter(lut,p=1.0)(fname, split_idx=0)
@@ -211,7 +200,7 @@ fig
 
 
 
-![png](docs/images/output_24_0.png)
+![png](docs/images/output_23_0.png)
 
 
 
