@@ -22,6 +22,7 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "torch_to_numpy": "04_inference_export-to-other-frameworks.ipynb",
          "onnx_to_tf": "04_inference_export-to-other-frameworks.ipynb",
          "get_nn_spec": "04_inference_export-to-other-frameworks.ipynb",
+         "onnx_to_coreml": "04_inference_export-to-other-frameworks.ipynb",
          "is_3dlut_row": "05_augment_PIL-img_filters.ipynb",
          "read_lut": "05_augment_PIL-img_filters.ipynb",
          "ApplyPILFilter": "05_augment_PIL-img_filters.ipynb"}
