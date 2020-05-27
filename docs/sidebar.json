@@ -1,10 +1,16 @@
 {
-  "fastai2_extensions": {
-    "Overview": "/",
+  "Getting Started": {
+    "Overview": "/"
+  },
+  "Interpretation": {
     "Analyse Model Confidence": "/interpret_classification-interpretation",
     "Compare Models": "/interpret_compare-models",
     "GradCam": "/interpret_gradcam",
-    "Export To Other Frameworks": "/inference_export-to-other-frameworks",
-    "ImageFilter Data Augmentation": "/augment_PIL-img_filters"
+  },
+  "Inference": {
+    "Exporting Models": "/inference_export-to-other-frameworks",
+  },
+  "Data Augmentation": {
+    "Image Filters": "/augment_PIL-img_filters"
   }
 }
