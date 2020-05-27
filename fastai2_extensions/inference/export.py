@@ -95,6 +95,10 @@ def torch_to_numpy(x:tensor):
     else:               return x.cpu().numpy()
 
 # Cell
+import onnx_tf
+from onnx_tf.backend import prepare
+
+# Cell
 def onnx_to_tf(onnx_model:PathLike, output_path:PathLike):
     """
     Simplest wrapper around https://github.com/onnx/onnx-tensorflow/blob/master/example/onnx_to_tf.py
