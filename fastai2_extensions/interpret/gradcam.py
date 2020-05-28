@@ -48,7 +48,7 @@ def compute_gcam_items(learn, x, label) -> Tuple(torch.Tensor):
     gradients   = gradients  [0]
     activations = activations[0]
 
-    return gradients,activations,preds.detach().numpy().flatten()
+    return gradients,activations,preds.detach().cpu().numpy().flatten()
 
 # Cell
 def compute_gcam_map(gradients, activations):

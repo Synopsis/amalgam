@@ -33,8 +33,8 @@ modules = ["interpret/interpret.py",
            "inference/export.py",
            "augment/pil_filters.py"]
 
-doc_url = "https://rsomani95.github.io/fastai2_extensions/"
+doc_url = "https://Synopsis.github.io/fastai2_extensions/"
 
-git_url = "https://github.com/rsomani95/fastai2_extensions/tree/master/"
+git_url = "https://github.com/Synopsis/fastai2_extensions/tree/master/"
 
 def custom_doc_links(name): return None
