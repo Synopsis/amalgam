@@ -5,7 +5,6 @@ __all__ = ['ClassificationInterpretationEx']
 # Cell
 from fastai2.vision.all import *
 from fastai2.metrics import *
-from nbdev.showdoc import show_doc
 
 # Cell
 class ClassificationInterpretationEx(ClassificationInterpretation):
