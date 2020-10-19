@@ -36,14 +36,16 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "ColorChannelTfms": "06_augment_albumentations.ipynb",
          "LightingTfms": "06_augment_albumentations.ipynb",
          "OtherTfms": "06_augment_albumentations.ipynb",
-         "Tfms": "06_augment_albumentations.ipynb"}
+         "Tfms": "06_augment_albumentations.ipynb",
+         "KorniaBase": "07_augment_kornia.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
            "interpret/gradcam.py",
            "inference/export.py",
            "augment/pil_filters.py",
-           "augment/albumentations.py"]
+           "augment/albumentations.py",
+           "augment/kornia.py"]
 
 doc_url = "https://Synopsis.github.io/fastai2_extensions/"
 
