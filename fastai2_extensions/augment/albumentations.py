@@ -4,7 +4,10 @@ __all__ = ['albu_augment', 'AlbumentationsWrapper', 'BlurringTfms', 'StyleTfms',
            'ColorTonesTfms', 'ColorChannelTfms', 'LightingTfms', 'OtherTfms', 'Tfms']
 
 # Cell
-from fastai2.vision.all import *
+try:
+    from fastai.vision.all import *
+except:
+    from fastai2.vision.all import *
 import PIL
 
 # Cell

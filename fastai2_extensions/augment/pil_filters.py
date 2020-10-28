@@ -3,7 +3,10 @@
 __all__ = ['is_3dlut_row', 'read_lut', 'ApplyPILFilter']
 
 # Cell
-from fastai2.vision.all import *
+try:
+    from fastai.vision.all import *
+except:
+    from fastai2.vision.all import *
 from PIL import ImageFilter
 
 # Cell

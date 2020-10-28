@@ -4,7 +4,10 @@ __all__ = ['Hook', 'HookBwd', 'create_test_img', 'compute_gcam_items', 'compute_
            'GradCam', 'PathLike']
 
 # Cell
-from fastai2.vision.all import *
+try:
+    from fastai.vision.all import *
+except:
+    from fastai2.vision.all import *
 
 # Cell
 class Hook():

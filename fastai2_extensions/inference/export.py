@@ -4,7 +4,10 @@ __all__ = ['to_cuda', 'preprocess_one', 'preprocess_batch', 'PathLike', 'open_im
            'onnx_to_tf', 'get_nn_spec', 'onnx_to_coreml']
 
 # Cell
-from fastai2.vision.all import *
+try:
+    from fastai.vision.all import *
+except:
+    from fastai2.vision.all import *
 
 # Cell
 import torchvision.transforms.functional as TTF

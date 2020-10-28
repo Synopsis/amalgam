@@ -3,8 +3,12 @@
 __all__ = ['intersection', 'compare_venn']
 
 # Cell
-from fastai2.vision.all import *
-from . import *
+try:
+    from fastai.vision.all import *
+    from fastai.metrics import *
+except:
+    from fastai2.vision.all import *
+    from fastai2.metrics import *
 
 # Cell
 def intersection(sets:Collection):
