@@ -8,6 +8,7 @@ try:
     from fastai.vision.all import *
 except:
     from fastai2.vision.all import *
+from typing import List, Tuple, Callable, Union, Optional, Any
 
 # Cell
 import torchvision.transforms.functional as TTF

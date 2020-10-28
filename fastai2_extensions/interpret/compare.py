@@ -9,6 +9,7 @@ try:
 except:
     from fastai2.vision.all import *
     from fastai2.metrics import *
+from typing import Collection, Tuple, List, Callable
 
 # Cell
 def intersection(sets:Collection):

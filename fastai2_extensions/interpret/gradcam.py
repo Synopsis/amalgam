@@ -8,6 +8,7 @@ try:
     from fastai.vision.all import *
 except:
     from fastai2.vision.all import *
+from typing import List, Tuple, Callable, Union, Optional, Any
 
 # Cell
 class Hook():
@@ -33,7 +34,7 @@ def create_test_img(learn, f, return_img=True):
     return x
 
 # Cell
-def compute_gcam_items(learn, x, label) -> Tuple(torch.Tensor):
+def compute_gcam_items(learn, x, label) -> Tuple[torch.Tensor]:
     'Compute gradient and activations of `model` for `x` with respect to `label`'
 
     label_idx = learn.dls.vocab.o2i[label]
