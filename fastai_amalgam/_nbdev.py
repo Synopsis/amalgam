@@ -37,7 +37,9 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "LightingTfms": "06_augment_albumentations.ipynb",
          "OtherTfms": "06_augment_albumentations.ipynb",
          "Tfms": "06_augment_albumentations.ipynb",
-         "KorniaBase": "07_augment_kornia.ipynb"}
+         "KorniaBase": "07_augment_kornia.ipynb",
+         "FocalLoss": "08_loss_functions.ipynb",
+         "FocalLossFlat": "08_loss_functions.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
@@ -45,7 +47,8 @@ modules = ["interpret/interpret.py",
            "inference/export.py",
            "augment/pil_filters.py",
            "augment/albumentations.py",
-           "augment/kornia.py"]
+           "augment/kornia.py",
+           "loss_funcs.py"]
 
 doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
