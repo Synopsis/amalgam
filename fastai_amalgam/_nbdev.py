@@ -47,8 +47,8 @@ modules = ["interpret/interpret.py",
            "augment/albumentations.py",
            "augment/kornia.py"]
 
-doc_url = "https://Synopsis.github.io/fastai2_extensions/"
+doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
-git_url = "https://github.com/Synopsis/fastai2_extensions/tree/master/"
+git_url = "https://github.com/Synopsis/fastai_amalgam/tree/master/"
 
 def custom_doc_links(name): return None
