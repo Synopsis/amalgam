@@ -38,8 +38,6 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "OtherTfms": "06_augment_albumentations.ipynb",
          "Tfms": "06_augment_albumentations.ipynb",
          "KorniaBase": "07_augment_kornia.ipynb",
-         "FocalLoss": "08_loss_functions.ipynb",
-         "FocalLossFlat": "08_loss_functions.ipynb",
          "MotionBlur": "07_augment_kornia.ipynb",
          "ColorJitter": "07_augment_kornia.ipynb",
          "RandomRotation": "07_augment_kornia.ipynb",
@@ -47,7 +45,9 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "HFlip": "07_augment_kornia.ipynb",
          "VFlip": "07_augment_kornia.ipynb",
          "RandomGrayscale": "07_augment_kornia.ipynb",
-         "RandomPerspective": "07_augment_kornia.ipynb"}
+         "amalgam_kornia_tfms": "07_augment_kornia.ipynb",
+         "FocalLoss": "08_loss_functions.ipynb",
+         "FocalLossFlat": "08_loss_functions.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
