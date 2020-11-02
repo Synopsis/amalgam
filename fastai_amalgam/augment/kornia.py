@@ -144,7 +144,7 @@ class RandomGrayscale(KorniaBase):
 # Cell
 amalgam_kornia_tfms = [
     'RandomRotation', 'RandomGrayscale',
-    'RandomPerspective', 'MotionBlur'
+    'RandomPerspective', 'MotionBlur',
     'MedianBlur', 'HFlip', 'VFlip',
     'ColorJitter'
 ]
