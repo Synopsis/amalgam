@@ -47,7 +47,9 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "HFlip": "07_augment_kornia.ipynb",
          "VFlip": "07_augment_kornia.ipynb",
          "RandomGrayscale": "07_augment_kornia.ipynb",
-         "RandomPerspective": "07_augment_kornia.ipynb"}
+         "RandomPerspective": "07_augment_kornia.ipynb",
+         "PIL.Image.Image.draw_labels": "inference_pretty-predict.ipynb",
+         "color": "inference_pretty-predict.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
@@ -56,7 +58,8 @@ modules = ["interpret/interpret.py",
            "augment/pil_filters.py",
            "augment/albumentations.py",
            "augment/kornia.py",
-           "loss_funcs.py"]
+           "loss_funcs.py",
+           "inference/predict.py"]
 
 doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
