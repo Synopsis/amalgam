@@ -17,7 +17,7 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "to_cuda": "04_inference_export-to-other-frameworks.ipynb",
          "preprocess_one": "04_inference_export-to-other-frameworks.ipynb",
          "preprocess_batch": "04_inference_export-to-other-frameworks.ipynb",
-         "open_image": "04_inference_export-to-other-frameworks.ipynb",
+         "open_image": "utils.ipynb",
          "torch_to_onnx": "04_inference_export-to-other-frameworks.ipynb",
          "torch_to_numpy": "04_inference_export-to-other-frameworks.ipynb",
          "onnx_to_tf": "04_inference_export-to-other-frameworks.ipynb",
@@ -38,8 +38,6 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "OtherTfms": "06_augment_albumentations.ipynb",
          "Tfms": "06_augment_albumentations.ipynb",
          "KorniaBase": "07_augment_kornia.ipynb",
-         "FocalLoss": "08_loss_functions.ipynb",
-         "FocalLossFlat": "08_loss_functions.ipynb",
          "MotionBlur": "07_augment_kornia.ipynb",
          "ColorJitter": "07_augment_kornia.ipynb",
          "RandomRotation": "07_augment_kornia.ipynb",
@@ -48,8 +46,11 @@ index = {"ClassificationInterpretationEx": "01_interpret_classification-interpre
          "VFlip": "07_augment_kornia.ipynb",
          "RandomGrayscale": "07_augment_kornia.ipynb",
          "RandomPerspective": "07_augment_kornia.ipynb",
+         "FocalLoss": "08_loss_functions.ipynb",
+         "FocalLossFlat": "08_loss_functions.ipynb",
          "PIL.Image.Image.draw_labels": "inference_pretty-predict.ipynb",
-         "color": "inference_pretty-predict.ipynb"}
+         "color": "inference_pretty-predict.ipynb",
+         "make_img_grid": "utils.ipynb"}
 
 modules = ["interpret/interpret.py",
            "interpret/compare.py",
@@ -59,7 +60,8 @@ modules = ["interpret/interpret.py",
            "augment/albumentations.py",
            "augment/kornia.py",
            "loss_funcs.py",
-           "inference/predict.py"]
+           "inference/predict.py",
+           "utils.py"]
 
 doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
