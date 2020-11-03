@@ -47,20 +47,30 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         plt.grid(False)
         if return_fig: return fig
 
-    def compute_label_confidence(self):
+    def compute_label_confidence(self:ClassificationInterpretationEx):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
         `self.preds_df` and `self.preds_df_each`
         """
-        self._preds_collated = [
-            (item, self.dl.vocab[label_idx], *preds.numpy()*100)\
-            for item,label_idx,preds in zip(self.dl.items,
-                                            self.targs,
-                                            self.preds)
-        ]
+        if not isinstance(self.dl.items, pd.DataFrame):
+            self._preds_collated = [
+                (item, self.dl.vocab[label_idx], *preds.numpy()*100)\
+                for item,label_idx,preds in zip(self.dl.items,
+                                                self.targs,
+                                                self.preds)
+            ]
+        ## need to extract fname from DataFrame
+        elif isinstance(self.dl.items, pd.DataFrame):
+            self._preds_collated = [
+                (item.fnames, self.dl.vocab[label_idx], *preds.numpy()*100)\
+                for (_,item),label_idx,preds in zip(self.dl.items.iterrows(),
+                                                self.targs,
+                                                self.preds)
+            ]
 
         self.preds_df       = pd.DataFrame(self._preds_collated, columns = ['fname','truth', *self.dl.vocab])
+        self.preds_df.insert(2, column='loss', value=self.losses.numpy())
         self._preds_df_each = {l:self.preds_df.copy()[self.preds_df.truth == l].reset_index(drop=True) for l in self.dl.vocab}
         self.preds_df_each  = defaultdict(dict)
 
