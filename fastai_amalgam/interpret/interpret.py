@@ -47,7 +47,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         plt.grid(False)
         if return_fig: return fig
 
-    def compute_label_confidence(self:ClassificationInterpretationEx):
+    def compute_label_confidence(self):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
