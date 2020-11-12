@@ -24,7 +24,6 @@ def draw_labels(
     ) -> PIL.Image.Image:
     """Draw `labels` on top of `img`
 
-    * img: PIL.Image to be drawn over
     * labels: The text that will be "drawn" on the image. Can be a
               list of strings as well
     * font_size: Explicitly set font-size. Not recommended.
@@ -38,6 +37,7 @@ def draw_labels(
     * fsize_div_factor: Set font size to img.width/fsize_div_factor
                         Font size is smaller for larger values
     """
+    img = self
     draw = ImageDraw.Draw(img)
     if font_size is None: font_size = int(img.width/fsize_div_factor)
     fcolor = color(*font_color)
