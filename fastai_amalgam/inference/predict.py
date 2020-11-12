@@ -18,6 +18,7 @@ def draw_labels(
     font_size:float=None,
     font_color:Union[tuple,int] = (220,220,220),
     font_path:str  = '../fonts/DIN Alternate Bold.ttf',
+    #font_path:str  = None,
     location:str   = 'bottom',
     draw_rect:bool = False,
     fsize_div_factor:int = 32
@@ -39,10 +40,16 @@ def draw_labels(
     """
     img = self # this allows us to easily pull out the function without `@patch` support
     draw = ImageDraw.Draw(img)
+    if font_path is not None:
+        if not Path(font_path).exists: raise FileNotFoundError(f"Couldn't find font file @ {font_path}")
     if font_size is None: font_size = int(img.width/fsize_div_factor)
-    fcolor = color(*font_color)
-    font   = ImageFont.truetype(font_path, size=font_size)
+    if font_path is not None:
+        font = ImageFont.truetype(font_path, size=font_size)
+    else:
+        font = ImageFont.load_default()
+        warnings.warn("Loaded default PIL ImageFont. It's highly recommended you use a custom font as the da")
 
+    fcolor = color(*font_color)
     # Check for valid locations
     valid_locations = ['bottom', 'bottom-right', 'bottom-left',
                        'top', 'top-right', 'top-left']
