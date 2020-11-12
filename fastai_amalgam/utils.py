@@ -6,6 +6,11 @@ __all__ = ['open_image', 'make_img_grid']
 from fastai.vision.all import *
 
 # Cell
+import PIL
+from typing import List
+from torchvision.utils import make_grid
+
+# Cell
 def open_image(fname:Union[str,Path], size:tuple=None, as_array=False, as_tensor=False):
     'Open a _single_ image from disk, optionally resize and/or convert to array'
     img = PIL.Image.open(fname).convert('RGB')
