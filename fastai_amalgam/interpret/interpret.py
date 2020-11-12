@@ -22,6 +22,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
       * self.plot_confusion_matrix()
       * self.plot_accuracy()
       * self.get_fnames()
+      * self.plot_top_losses_grid()
+      * self.print_classification_report()
     """
     def __init__(self, dl, inputs, preds, targs, decoded, losses):
         super().__init__(dl, inputs, preds, targs, decoded, losses)
@@ -92,7 +94,7 @@ from palettable.scientific.sequential import Davos_3_r
 
 @patch
 def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, title='Confusion matrix', cmap=None, norm_dec=2,
-                          plot_txt=True, return_fig=False, dpi=100, **kwargs):
+                          plot_txt=True, return_fig=False, dpi=100, figsize=(5,5), **kwargs):
     """
     Plot the confusion matrix
 
@@ -103,7 +105,7 @@ def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, t
     # This function is mainly copied from the sklearn docs
     cm = interp.confusion_matrix()
     if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    fig = plt.figure(dpi=dpi, **kwargs)
+    fig = plt.figure(dpi=dpi, figsize=figsize, **kwargs)
     if cmap is None: cmap=Davos_3_r.mpl_colormap
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
@@ -241,3 +243,13 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
         results.append(draw_label(x, out))
     return make_img_grid(results, img_size=None, ncol=ncol)
     #for img,truth,pred_labels,preds_raw,loss in zip(x,y,)
+
+# Cell
+import sklearn.metrics as skm
+@patch
+def print_classification_report(self:ClassificationInterpretationEx, as_dict=True):
+    "Get scikit-learn classification report"
+    d,t = flatten_check(self.decoded, self.targs)
+    if as_dict:
+          return skm.classification_report(t, d, labels=list(self.vocab.o2i.values()), target_names=[str(v) for v in self.vocab], output_dict=True)
+    else: return skm.classification_report(t, d, labels=list(self.vocab.o2i.values()), target_names=[str(v) for v in self.vocab], output_dict=False)
