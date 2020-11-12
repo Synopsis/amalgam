@@ -50,7 +50,8 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "GradCam": "interpret_gradcam.ipynb",
          "FocalLoss": "loss_functions.ipynb",
          "FocalLossFlat": "loss_functions.ipynb",
-         "make_img_grid": "utils.ipynb"}
+         "make_img_grid": "utils.ipynb",
+         "img2arraylike": "utils.ipynb"}
 
 modules = ["augment/pil_filters.py",
            "augment/albumentations.py",
