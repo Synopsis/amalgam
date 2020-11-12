@@ -88,11 +88,10 @@ def draw_labels(
     if font_path is not None:
         font = ImageFont.truetype(font_path, size=font_size)
     else:
+        font = ImageFont.load_default()
+        warnings.warn("Loaded default PIL ImageFont. It's highly recommended you use a custom font as the default font's size cannot be tweaked")
         if font_size is not None:
-            raise RuntimeError(f"`font_size` cannot be set when not using a custom font passed via `font_path`")
-        else:
-            font = ImageFont.load_default()
-            warnings.warn("Loaded default PIL ImageFont. It's highly recommended you use a custom font as the default font's size cannot be tweaked")
+            warnings.warn(f"`font_size` cannot be used when not using a custom font passed via `font_path`")
     img = self # this allows us to easily pull out the function without `@patch` support
     draw = ImageDraw.Draw(img)
     if font_size is None: font_size = int(img.width/fsize_div_factor)
