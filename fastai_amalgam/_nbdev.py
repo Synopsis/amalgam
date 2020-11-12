@@ -51,7 +51,10 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "FocalLoss": "loss_functions.ipynb",
          "FocalLossFlat": "loss_functions.ipynb",
          "make_img_grid": "utils.ipynb",
-         "img2arraylike": "utils.ipynb"}
+         "img2arraylike": "utils.ipynb",
+         "TfmdDL.set_font_path": "show_data.ipynb",
+         "draw_label": "show_data.ipynb",
+         "TfmdDL.show_batch_grid": "show_data.ipynb"}
 
 modules = ["augment/pil_filters.py",
            "augment/albumentations.py",
@@ -62,7 +65,8 @@ modules = ["augment/pil_filters.py",
            "interpret/compare.py",
            "interpret/gradcam.py",
            "loss_funcs.py",
-           "utils.py"]
+           "utils.py",
+           "show_data.py"]
 
 doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
