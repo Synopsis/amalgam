@@ -54,7 +54,11 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "img2arraylike": "utils.ipynb",
          "TfmdDL.set_font_path": "show_data.ipynb",
          "draw_label": "show_data.ipynb",
-         "TfmdDL.show_batch_grid": "show_data.ipynb"}
+         "TfmdDL.show_batch_grid": "show_data.ipynb",
+         "ClassificationInterpretationEx.plot_confusion_matrix": "interpret_classification-interpretation.ipynb",
+         "ClassificationInterpretationEx.plot_accuracy": "interpret_classification-interpretation.ipynb",
+         "ClassificationInterpretationEx.plot_label_confidence": "interpret_classification-interpretation.ipynb",
+         "ClassificationInterpretationEx.plot_top_losses_grid": "interpret_classification-interpretation.ipynb"}
 
 modules = ["augment/pil_filters.py",
            "augment/albumentations.py",

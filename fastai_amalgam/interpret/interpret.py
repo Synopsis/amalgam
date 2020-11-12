@@ -3,49 +3,31 @@
 __all__ = ['ClassificationInterpretationEx']
 
 # Cell
-try:
-    from fastai.vision.all import *
-    from fastai.metrics import *
-except:
-    from fastai2.vision.all import *
-    from fastai2.metrics import *
+from fastai.vision.all import *
+from fastai.metrics import *
+import PIL
 
 # Cell
+from ..utils import *
+from ..show_data import *
+
+# Cell
+import fastai
 class ClassificationInterpretationEx(ClassificationInterpretation):
     """
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
+    See:
+      * self.preds_df
+      * self.plot_label_confidence()
+      * self.plot_confusion_matrix()
+      * self.plot_accuracy()
+      * self.get_fnames()
     """
-    def plot_confusion_matrix(interp, normalize=False, title='Confusion matrix', cmap="Blues", norm_dec=2,
-                              plot_txt=True, return_fig=False, **kwargs):
-        """
-        Plot the confusion matrix, with `title` and using `cmap`.
-        An exact replica of fastai2's method, with the added option
-        of `return_fig`, to be able to save the image to disk
-        """
-        # This function is mainly copied from the sklearn docs
-        cm = interp.confusion_matrix()
-        if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        fig = plt.figure(**kwargs)
-        plt.imshow(cm, interpolation='nearest', cmap=cmap)
-        plt.title(title)
-        tick_marks = np.arange(len(interp.vocab))
-        plt.xticks(tick_marks, interp.vocab, rotation=90)
-        plt.yticks(tick_marks, interp.vocab, rotation=0)
-
-        if plot_txt:
-            thresh = cm.max() / 2.
-            for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-                coeff = f'{cm[i, j]:.{norm_dec}f}' if normalize else f'{cm[i, j]}'
-                plt.text(j, i, coeff, horizontalalignment="center", verticalalignment="center", color="white" if cm[i, j] > thresh else "black")
-
-        ax = fig.gca()
-        ax.set_ylim(len(interp.vocab)-.5,-.5)
-
-        plt.tight_layout()
-        plt.ylabel('Actual')
-        plt.xlabel('Predicted')
-        plt.grid(False)
-        if return_fig: return fig
+    def __init__(self, dl, inputs, preds, targs, decoded, losses):
+        super().__init__(dl, inputs, preds, targs, decoded, losses)
+        self.vocab = self.dl.vocab
+        if is_listy(self.vocab): self.vocab = self.vocab[-1]
+        self.compute_label_confidence()
 
     def compute_label_confidence(self):
         """
@@ -85,74 +67,6 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.preds_df_each[label]['inaccurate'] = sort_desc(self.preds_df_each[label]['inaccurate'], label)
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
 
-    def plot_label_confidence(self, bins:int=10, fig_width:int=12, fig_height_base:int=4,
-                              title:str='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
-                              return_fig:bool=False, label_bins:bool=True,
-                              accurate_color='mediumseagreen', inaccurate_color='tomato'):
-        'Plot label confidence histograms for each label'
-        if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
-        fig, axes = plt.subplots(nrows = len(self.preds_df_each.keys()), ncols=2,
-                                 figsize = (fig_width, fig_height_base * len(self.dl.vocab)))
-        for i, (label, df) in enumerate(self.preds_df_each.items()):
-            height=0
-            # find max height
-            for mode in ['inaccurate', 'accurate']:
-                len_bins,_ = np.histogram(df[mode][label], bins=10)
-                if len_bins.max() > height: height=len_bins.max()
-
-            for mode,ax in zip(['inaccurate', 'accurate'], axes[i]):
-                range_ = (50,100) if mode == 'accurate' else (0,50)
-                color  = accurate_color if mode == 'accurate' else inaccurate_color
-                num,_,patches = ax.hist(df[mode][label], bins=bins, range=range_, rwidth=.95, color=color)
-                if label_bins:
-                    for rect in patches:
-                        ht = rect.get_height()
-                        ax.annotate(s  = f"{int(ht) if ht > 0 else ''}",
-                            xy = (rect.get_x() + rect.get_width()/2, ht),
-                            xytext = (0,3), # offset vertically by 3 points
-                            textcoords = 'offset points',
-                            ha = 'center', va = 'bottom'
-                           )
-                ax.set_ybound(upper=height + height*0.3)
-                ax.set_xlabel(f'{label}: {mode.capitalize()}')
-                ax.set_ylabel(f'No. {mode.capitalize()} = {len(df[mode][label])}')
-        fig.suptitle(title)
-        plt.subplots_adjust(top = 0.9, bottom=0.01, hspace=0.25, wspace=0.2)
-        if return_fig: return fig
-
-
-    def plot_accuracy(self, width=0.5, figsize=(6,6), return_fig=False,
-                      title='Accuracy Per Label', ylabel='Accuracy (%)',
-                      color='steelblue', vertical_labels=False):
-        'Plot a bar plot showing accuracy per label'
-        if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
-        self.accuracy_dict = defaultdict()
-
-        for label,df in self.preds_df_each.items():
-            total = len(df['accurate']) + len(df['inaccurate'])
-            self.accuracy_dict[label] = 100 * len(df['accurate']) / total
-
-        fig,ax = plt.subplots(figsize=figsize)
-
-        x = self.accuracy_dict.keys()
-        y = [v for k,v in self.accuracy_dict.items()]
-
-        rects = ax.bar(x,y,width,color=color)
-        for rect in rects:
-            ht = rect.get_height()
-            ax.annotate(s  = f"{ht:.02f}",
-                        xy = (rect.get_x() + rect.get_width()/2, ht),
-                        xytext = (0,3), # offset vertically by 3 points
-                        textcoords = 'offset points',
-                        ha = 'center', va = 'bottom'
-                       )
-        ax.set_ybound(lower=0, upper=100)
-        ax.set_yticks(np.arange(0,110,10))
-        ax.set_ylabel(ylabel)
-        ax.set_xticklabels(x, rotation='vertical' if vertical_labels else 'horizontal')
-        plt.suptitle(title)
-        if return_fig: return fig
-
     def get_fnames(self, label:str,
                    mode:('accurate','inaccurate'),
                    conf_level:Union[int,float,tuple]) -> np.ndarray:
@@ -172,3 +86,158 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             if isinstance(conf_level, tuple):       filt = df[label].between(*conf_level)
             if isinstance(conf_level, (int,float)): filt = df[label] < conf_level
         return df[filt].fname.values
+
+# Cell
+from palettable.scientific.sequential import Davos_3_r
+
+@patch
+def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, title='Confusion matrix', cmap=None, norm_dec=2,
+                          plot_txt=True, return_fig=False, dpi=100, **kwargs):
+    """
+    Plot the confusion matrix
+
+    A near exact replica of fastai's method, with the added option
+    of `return_fig`, to be able to save the image to disk and a
+    different default colormap
+    """
+    # This function is mainly copied from the sklearn docs
+    cm = interp.confusion_matrix()
+    if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    fig = plt.figure(dpi=dpi, **kwargs)
+    if cmap is None: cmap=Davos_3_r.mpl_colormap
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    tick_marks = np.arange(len(interp.vocab))
+    plt.xticks(tick_marks, interp.vocab, rotation=90)
+    plt.yticks(tick_marks, interp.vocab, rotation=0)
+
+    if plot_txt:
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            coeff = f'{cm[i, j]:.{norm_dec}f}' if normalize else f'{cm[i, j]}'
+            plt.text(j, i, coeff, horizontalalignment="center", verticalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+    ax = fig.gca()
+    ax.set_ylim(len(interp.vocab)-.5,-.5)
+
+    plt.tight_layout()
+    plt.ylabel('Actual')
+    plt.xlabel('Predicted')
+    plt.grid(False)
+    if return_fig: return fig
+
+# Cell
+@patch
+def plot_accuracy(self:ClassificationInterpretationEx, width=0.9, figsize=(6,6), return_fig=False,
+                  title='Accuracy Per Label', ylabel='Accuracy (%)', style='ggplot',
+                  color='#2a467e', vertical_labels=True):
+    'Plot a bar plot showing accuracy per label'
+    plt.style.use(style)
+    if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
+    self.accuracy_dict = defaultdict()
+
+    for label,df in self.preds_df_each.items():
+        total = len(df['accurate']) + len(df['inaccurate'])
+        self.accuracy_dict[label] = 100 * len(df['accurate']) / total
+
+    fig,ax = plt.subplots(figsize=figsize)
+
+    x = self.accuracy_dict.keys()
+    y = [v for k,v in self.accuracy_dict.items()]
+
+    rects = ax.bar(x,y,width,color=color)
+    for rect in rects:
+        ht = rect.get_height()
+        ax.annotate(s  = f"{ht:.02f}",
+                    xy = (rect.get_x() + rect.get_width()/2, ht),
+                    xytext = (0,3), # offset vertically by 3 points
+                    textcoords = 'offset points',
+                    ha = 'center', va = 'bottom'
+                   )
+    ax.set_ybound(lower=0, upper=100)
+    ax.set_yticks(np.arange(0,110,10))
+    ax.set_ylabel(ylabel)
+    ax.set_xticklabels(x, rotation='vertical' if vertical_labels else 'horizontal')
+    plt.suptitle(title)
+    plt.tight_layout()
+    if return_fig: return fig
+
+# Cell
+@patch
+def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_width:int=12, fig_height_base:int=4,
+                          title:str='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
+                          return_fig:bool=False, label_bars:bool=True, style='ggplot', dpi=150,
+                          accurate_color='#2a467e', inaccurate_color='#dc4a46'):
+    'Plot label confidence histograms for each label'
+    plt.style.use(style)
+    if not hasattr(interp, 'preds_df_each'): interp.compute_label_confidence()
+    fig, axes = plt.subplots(nrows = len(interp.preds_df_each.keys()), ncols=2, dpi=dpi,
+                             figsize = (fig_width, fig_height_base * len(interp.dl.vocab)))
+    for i, (label, df) in enumerate(interp.preds_df_each.items()):
+        height=0
+        # find max height
+        for mode in ['inaccurate', 'accurate']:
+            len_bins,_ = np.histogram(df[mode][label], bins=bins)
+            if len_bins.max() > height: height=len_bins.max()
+
+        for mode,ax in zip(['inaccurate', 'accurate'], axes[i]):
+            range_ = (50,100) if mode == 'accurate' else (0,50)
+            color  = accurate_color if mode == 'accurate' else inaccurate_color
+            num,_,patches = ax.hist(df[mode][label], bins=bins, range=range_, rwidth=.95, color=color)
+            num_samples = len(df['inaccurate'][label]) + len(df['accurate'][label])
+            pct_share   = len(df[mode][label]) / num_samples
+            if label_bars:
+                for rect in patches:
+                    ht = rect.get_height()
+                    ax.annotate(s  = f"{round((int(ht) / num_samples) * 100, 1) if ht > 0 else 0}%",
+                        xy = (rect.get_x() + rect.get_width()/2, ht),
+                        xytext = (0,3), # offset vertically by 3 points
+                        textcoords = 'offset points',
+                        ha = 'center', va = 'bottom'
+                       )
+            ax.set_ybound(upper=height + height*0.3)
+            ax.set_xlabel(f'{label}: {mode.capitalize()} ({round(pct_share * 100, 2)}%)')
+            ax.set_ylabel(f'Num. {mode.capitalize()} ({len(df[mode][label])} of {num_samples})')
+    fig.suptitle(title, y=1.0)
+    plt.subplots_adjust(top = 0.9, bottom=0.01, hspace=0.25, wspace=0.2)
+    plt.tight_layout()
+    if return_fig: return fig
+
+# Cell
+@patch
+def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, largest=True,
+                         font_path=None, font_size=13, **kwargs) -> PIL.Image.Image:
+    """Plot top losses in a grid
+
+    Uses fastai'a `ClassificationInterpretation.plot_top_losses` to fetch
+    predictions, and makes a grid with the True labels, predictions, loss
+    and prediction confidence ingrained into the image
+    """
+    # all of the pred fetching code is copied over from
+    # fastai's `ClassificationInterpretation.plot_top_losses`
+    # and only plotting code is added here
+    losses,idx = self.top_losses(k, largest)
+    if not isinstance(self.inputs, tuple): self.inputs = (self.inputs,)
+    if isinstance(self.inputs[0], Tensor): inps = tuple(o[idx] for o in self.inputs)
+    else: inps = self.dl.create_batch(self.dl.before_batch([tuple(o[i] for o in self.inputs) for i in idx]))
+    b = inps + tuple(o[idx] for o in (self.targs if is_listy(self.targs) else (self.targs,)))
+    x,y,its = self.dl._pre_show_batch(b, max_n=k)
+    b_out = inps + tuple(o[idx] for o in (self.decoded if is_listy(self.decoded) else (self.decoded,)))
+    x1,y1,outs = self.dl._pre_show_batch(b_out, max_n=k)
+    #if its is not None:
+    #    _plot_top_losses(x, y, its, outs.itemgot(slice(len(inps), None)), self.preds[idx], losses,  **kwargs)
+    plot_items = its.itemgot(0), its.itemgot(1), outs.itemgot(slice(len(inps), None)), self.preds[idx], losses
+    def draw_label(x:TensorImage, labels):
+        return PILImage.create(x).draw_labels(labels, font_path=font_path, font_size=font_size, location="bottom")
+    results = []
+    for x, truth, preds, preds_raw, loss in zip(*plot_items):
+        out = []
+        out.append(f"{'TRUTH: '.rjust(8)} {truth}")
+        probs_i = np.array([interp.dl.vocab.o2i[o] for o in preds])
+        pred2prob = [f"{pred} ({round(prob.item()*100,2)}%)" for pred,prob in zip(preds,preds_raw[probs_i])]
+        bsl = '\n' # since f-strings can't have backslashes
+        out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
+        out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
+        results.append(draw_label(x, out))
+    return make_img_grid(results, img_size=None, ncol=ncol)
+    #for img,truth,pred_labels,preds_raw,loss in zip(x,y,)
