@@ -37,7 +37,7 @@ def draw_labels(
     * fsize_div_factor: Set font size to img.width/fsize_div_factor
                         Font size is smaller for larger values
     """
-    img = self
+    img = self # this allows us to easily pull out the function without `@patch` support
     draw = ImageDraw.Draw(img)
     if font_size is None: font_size = int(img.width/fsize_div_factor)
     fcolor = color(*font_color)
@@ -49,7 +49,7 @@ def draw_labels(
     if not location in valid_locations: raise ValueError(f"`location` must contain 'bottom' or 'top', got {location}")
 
     # Convert labels to drawable format
-    if isinstance(labels, str): labels = [str]
+    if isinstance(labels, str): labels = [labels]
     if 'top' in location: labels = ['\n'.join(labels)]
 
     # Draw rectangle if asked for
