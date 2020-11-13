@@ -182,7 +182,7 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
     plt.style.use(style)
     if not hasattr(interp, 'preds_df_each'): interp.compute_label_confidence()
     fig, axes = plt.subplots(nrows = len(interp.preds_df_each.keys()), ncols=2, dpi=dpi,
-                             figsize = (fig_width, fig_height_base * len(interp.dl.vocab)))
+                             figsize = (fig_width, fig_height_base * len(self.dl.vocab)))
     for i, (label, df) in enumerate(interp.preds_df_each.items()):
         height=0
         # find max height
@@ -243,7 +243,7 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
     for x, truth, preds, preds_raw, loss in zip(*plot_items):
         out = []
         out.append(f"{'TRUTH: '.rjust(8)} {truth}")
-        probs_i = np.array([interp.dl.vocab.o2i[o] for o in preds])
+        probs_i = np.array([self.dl.vocab.o2i[o] for o in preds])
         pred2prob = [f"{pred} ({round(prob.item()*100,2)}%)" for pred,prob in zip(preds,preds_raw[probs_i])]
         bsl = '\n' # since f-strings can't have backslashes
         out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
