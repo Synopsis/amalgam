@@ -170,7 +170,15 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
                           title:str='Accurate vs. Inaccurate Predictions Confidence (%) Levels Per Label',
                           return_fig:bool=False, label_bars:bool=True, style='ggplot', dpi=150,
                           accurate_color='#2a467e', inaccurate_color='#dc4a46'):
-    'Plot label confidence histograms for each label'
+    """Plot label confidence histograms for each label
+    Key Args:
+      * `bins`:       No. of bins on each side of the plot
+      * `return_fig`: If True, returns the figure that can be easily saved to disk
+      * `label_bars`: If True, displays the % of samples that fall into each bar
+      * `style`:      A matplotlib style. See `plt.style.available` for more
+      * `accurate_color`:   Color of the accurate bars
+      * `inaccurate_color`: Color of the inaccurate bars
+    """
     plt.style.use(style)
     if not hasattr(interp, 'preds_df_each'): interp.compute_label_confidence()
     fig, axes = plt.subplots(nrows = len(interp.preds_df_each.keys()), ncols=2, dpi=dpi,
