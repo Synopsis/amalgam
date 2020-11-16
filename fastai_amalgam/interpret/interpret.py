@@ -13,6 +13,12 @@ from ..show_data import *
 
 # Cell
 import fastai
+
+def _get_truths(vocab, label_idx, is_multilabel):
+    if is_multilabel:
+          return ';'.join([vocab[i] for i in torch.where(label_idx==1)][0])
+    else: return vocab[label_idx]
+
 class ClassificationInterpretationEx(ClassificationInterpretation):
     """
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
@@ -29,17 +35,32 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         super().__init__(dl, inputs, preds, targs, decoded, losses)
         self.vocab = self.dl.vocab
         if is_listy(self.vocab): self.vocab = self.vocab[-1]
+        if self.targs.__class__ == fastai.torch_core.TensorMultiCategory:
+              self.is_multilabel = True
+        else: self.is_multilabel = False
         self.compute_label_confidence()
+        self.determine_classifier_type()
 
-    def compute_label_confidence(self):
+    def determine_classifier_type(self):
+        if self.targs[0].__class__==fastai.torch_core.TensorCategory:
+            self.is_multilabel = False
+        if self.targs[0].__class__==fastai.torch_core.TensorMultiCategory:
+            self.is_multilabel = True
+            self.thresh = self.dl.loss_func.thresh
+
+    def compute_label_confidence(self, df_colname:Optional[str]="fnames"):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
         `self.preds_df` and `self.preds_df_each`
+
+        If the `DataLoaders` is constructed from a `pd.DataFrame`, use
+        `df_colname` to specify the column name with the filepaths
         """
         if not isinstance(self.dl.items, pd.DataFrame):
             self._preds_collated = [
-                (item, self.dl.vocab[label_idx], *preds.numpy()*100)\
+                #(item, self.dl.vocab[label_idx], *preds.numpy()*100)\
+                (item, _get_truths(self.dl.vocab, label_idx, self.is_multilabel), *preds.numpy()*100)\
                 for item,label_idx,preds in zip(self.dl.items,
                                                 self.targs,
                                                 self.preds)
@@ -47,7 +68,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         ## need to extract fname from DataFrame
         elif isinstance(self.dl.items, pd.DataFrame):
             self._preds_collated = [
-                (item.fnames, self.dl.vocab[label_idx], *preds.numpy()*100)\
+                #(item[df_colname], self.dl.vocab[label_idx], *preds.numpy()*100)\
+                (item[df_colname], _get_truths(self.dl.vocab, label_idx, self.is_multilabel), *preds.numpy()*100)\
                 for (_,item),label_idx,preds in zip(self.dl.items.iterrows(),
                                                 self.targs,
                                                 self.preds)
@@ -55,6 +77,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
 
         self.preds_df       = pd.DataFrame(self._preds_collated, columns = ['fname','truth', *self.dl.vocab])
         self.preds_df.insert(2, column='loss', value=self.losses.numpy())
+
+        if self.is_multilabel: return # preds_df_each doesnt make sense for multi-label
         self._preds_df_each = {l:self.preds_df.copy()[self.preds_df.truth == l].reset_index(drop=True) for l in self.dl.vocab}
         self.preds_df_each  = defaultdict(dict)
 
@@ -102,6 +126,8 @@ def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, t
     of `return_fig`, to be able to save the image to disk and a
     different default colormap
     """
+    if self.is_multilabel:
+        raise NotImplementedError(f"Confusion matrices for multi-label problems aren't implemented")
     # This function is mainly copied from the sklearn docs
     cm = interp.confusion_matrix()
     if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -134,6 +160,8 @@ def plot_accuracy(self:ClassificationInterpretationEx, width=0.9, figsize=(6,6),
                   title='Accuracy Per Label', ylabel='Accuracy (%)', style='ggplot',
                   color='#2a467e', vertical_labels=True):
     'Plot a bar plot showing accuracy per label'
+    if not hasattr(self, 'preds_df_each'):
+        raise NotImplementedError
     plt.style.use(style)
     if not hasattr(self, 'preds_df_each'): self.compute_label_confidence()
     self.accuracy_dict = defaultdict()
@@ -179,6 +207,8 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
       * `accurate_color`:   Color of the accurate bars
       * `inaccurate_color`: Color of the inaccurate bars
     """
+    if not hasattr(self, 'preds_df_each'):
+        raise NotImplementedError
     plt.style.use(style)
     if not hasattr(interp, 'preds_df_each'): interp.compute_label_confidence()
     fig, axes = plt.subplots(nrows = len(interp.preds_df_each.keys()), ncols=2, dpi=dpi,
@@ -216,12 +246,17 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
 # Cell
 @patch
 def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, largest=True,
-                         font_path=None, font_size=13, **kwargs) -> PIL.Image.Image:
+                         font_path=None, font_size=12, use_dedicated_layout=True) -> PIL.Image.Image:
     """Plot top losses in a grid
 
     Uses fastai'a `ClassificationInterpretation.plot_top_losses` to fetch
-    predictions, and makes a grid with the True labels, predictions, loss
-    and prediction confidence ingrained into the image
+    predictions, and makes a grid with the ground truth labels, predictions,
+    prediction confidence and loss ingrained into the image
+
+    By default, `use_dedicated_layout` is used to plot the loss (bottom),
+    truths (top-left), and predictions (top-right) in dedicated areas of the
+    image. If this is set to `False`, everything is printed at the bottom of the
+    image
     """
     # all of the pred fetching code is copied over from
     # fastai's `ClassificationInterpretation.plot_top_losses`
@@ -239,16 +274,36 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
     plot_items = its.itemgot(0), its.itemgot(1), outs.itemgot(slice(len(inps), None)), self.preds[idx], losses
     def draw_label(x:TensorImage, labels):
         return PILImage.create(x).draw_labels(labels, font_path=font_path, font_size=font_size, location="bottom")
+    # return plot_items
     results = []
     for x, truth, preds, preds_raw, loss in zip(*plot_items):
-        out = []
-        out.append(f"{'TRUTH: '.rjust(8)} {truth}")
+        if self.is_multilabel:
+            truth = ';'.join(truth)
+            preds = preds[0]
         probs_i = np.array([self.dl.vocab.o2i[o] for o in preds])
         pred2prob = [f"{pred} ({round(prob.item()*100,2)}%)" for pred,prob in zip(preds,preds_raw[probs_i])]
-        bsl = '\n' # since f-strings can't have backslashes
-        out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
-        out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
-        results.append(draw_label(x, out))
+        if use_dedicated_layout:
+            # draw loss at the bottom, preds on top-right
+            # and truths on the top
+            img = PILImage.create(x)
+            top = []
+            top.append("TRUTH: ")
+            top.append(truth)
+            pred2prob.insert(0, 'PREDS: ')
+            loss_text = f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}"
+            img.draw_labels(top,     location="top-left", font_size=font_size, font_path=font_path)
+            img.draw_labels(pred2prob, location="top-right", font_size=font_size, font_path=font_path)
+            img.draw_labels(loss_text, location="bottom", font_size=font_size, font_path=font_path)
+            results.append(img)
+        else:
+            # draw everything at the bottom
+            out = []
+            out.append(f"{'TRUTH: '.rjust(8)} {truth}")
+            bsl = '\n' # since f-strings can't have backslashes
+            out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
+            if self.is_multilabel: out.append('\n')
+            out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
+            results.append(draw_label(x, out))
     return make_img_grid(results, img_size=None, ncol=ncol)
     #for img,truth,pred_labels,preds_raw,loss in zip(x,y,)
 
