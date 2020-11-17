@@ -30,7 +30,7 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "preprocess_batch": "inference_export-to-other-frameworks.ipynb",
          "PathLike": "interpret_gradcam.ipynb",
          "open_image": "utils.ipynb",
-         "torch_to_onnx": "inference_export-to-other-frameworks.ipynb",
+         "torch_to_onnx": "export_onnx.ipynb",
          "torch_to_numpy": "inference_export-to-other-frameworks.ipynb",
          "onnx_to_tf": "inference_export-to-other-frameworks.ipynb",
          "get_nn_spec": "inference_export-to-other-frameworks.ipynb",
@@ -74,7 +74,8 @@ modules = ["augment/pil_filters.py",
            "interpret/gradcam.py",
            "loss_funcs.py",
            "show_data.py",
-           "utils.py"]
+           "utils.py",
+           "export/onnx.py"]
 
 doc_url = "https://Synopsis.github.io/fastai_amalgam/"
 
