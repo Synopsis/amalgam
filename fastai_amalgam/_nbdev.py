@@ -63,7 +63,8 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "img2arraylike": "utils.ipynb",
          "make_img_grid": "utils.ipynb",
          "PIL.Image.Image.draw_labels": "utils.ipynb",
-         "color": "utils.ipynb"}
+         "color": "utils.ipynb",
+         "Learner.gradcam": "interpret_gradcam.ipynb"}
 
 modules = ["augment/pil_filters.py",
            "augment/albumentations.py",
