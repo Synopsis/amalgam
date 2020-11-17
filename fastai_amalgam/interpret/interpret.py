@@ -310,9 +310,12 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
 # Cell
 import sklearn.metrics as skm
 @patch
-def print_classification_report(self:ClassificationInterpretationEx, as_dict=True):
+def print_classification_report(self:ClassificationInterpretationEx, as_dict=False):
     "Get scikit-learn classification report"
-    d,t = flatten_check(self.decoded, self.targs)
+    # `flatten_check` and `skm.classification_report` don't play
+    # nice together for multi-label
+    # d,t = flatten_check(self.decoded, self.targs)
+    d,t = self.decoded, self.targs
     if as_dict:
           return skm.classification_report(t, d, labels=list(self.vocab.o2i.values()), target_names=[str(v) for v in self.vocab], output_dict=True)
     else: return skm.classification_report(t, d, labels=list(self.vocab.o2i.values()), target_names=[str(v) for v in self.vocab], output_dict=False)
