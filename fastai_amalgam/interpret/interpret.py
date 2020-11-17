@@ -129,15 +129,15 @@ def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, t
     if self.is_multilabel:
         raise NotImplementedError(f"Confusion matrices for multi-label problems aren't implemented")
     # This function is mainly copied from the sklearn docs
-    cm = interp.confusion_matrix()
+    cm = self.confusion_matrix()
     if normalize: cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     fig = plt.figure(dpi=dpi, figsize=figsize, **kwargs)
     if cmap is None: cmap=Davos_3_r.mpl_colormap
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
-    tick_marks = np.arange(len(interp.vocab))
-    plt.xticks(tick_marks, interp.vocab, rotation=90)
-    plt.yticks(tick_marks, interp.vocab, rotation=0)
+    tick_marks = np.arange(len(self.vocab))
+    plt.xticks(tick_marks, self.vocab, rotation=90)
+    plt.yticks(tick_marks, self.vocab, rotation=0)
 
     if plot_txt:
         thresh = cm.max() / 2.
@@ -146,7 +146,7 @@ def plot_confusion_matrix(self:ClassificationInterpretationEx, normalize=True, t
             plt.text(j, i, coeff, horizontalalignment="center", verticalalignment="center", color="white" if cm[i, j] > thresh else "black")
 
     ax = fig.gca()
-    ax.set_ylim(len(interp.vocab)-.5,-.5)
+    ax.set_ylim(len(self.vocab)-.5,-.5)
 
     plt.tight_layout()
     plt.ylabel('Actual')
@@ -210,10 +210,9 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
     if not hasattr(self, 'preds_df_each'):
         raise NotImplementedError
     plt.style.use(style)
-    if not hasattr(interp, 'preds_df_each'): interp.compute_label_confidence()
-    fig, axes = plt.subplots(nrows = len(interp.preds_df_each.keys()), ncols=2, dpi=dpi,
+    fig, axes = plt.subplots(nrows = len(self.preds_df_each.keys()), ncols=2, dpi=dpi,
                              figsize = (fig_width, fig_height_base * len(self.dl.vocab)))
-    for i, (label, df) in enumerate(interp.preds_df_each.items()):
+    for i, (label, df) in enumerate(self.preds_df_each.items()):
         height=0
         # find max height
         for mode in ['inaccurate', 'accurate']:
