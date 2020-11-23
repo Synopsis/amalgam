@@ -243,9 +243,9 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
     if return_fig: return fig
 
 # Cell
-from fastai_amalgam.utils import *
+from ..utils import *
 @patch
-def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, largest=True,
+def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4,
                          font_path=None, font_size=12, use_dedicated_layout=True) -> PIL.Image.Image:
     """Plot top losses in a grid
 
@@ -261,7 +261,7 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
     # all of the pred fetching code is copied over from
     # fastai's `ClassificationInterpretation.plot_top_losses`
     # and only plotting code is added here
-    losses,idx = self.top_losses(k, largest)
+    losses,idx = self.top_losses(k, largest=True)
     if not isinstance(self.inputs, tuple): self.inputs = (self.inputs,)
     if isinstance(self.inputs[0], Tensor): inps = tuple(o[idx] for o in self.inputs)
     else: inps = self.dl.create_batch(self.dl.before_batch([tuple(o[i] for o in self.inputs) for i in idx]))
@@ -285,6 +285,7 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
             # draw loss at the bottom, preds on top-right
             # and truths on the top
             img = PILImage.create(x)
+            if isinstance(truth, Category): truth = [truth]
             truth.insert(0, "TRUTH: ")
             pred2prob.insert(0, 'PREDS: ')
             loss_text = f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}"
@@ -302,6 +303,7 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
             out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
             results.append(draw_label(x, out))
     return make_img_grid(results, img_size=None, ncol=ncol)
+
 # Cell
 import sklearn.metrics as skm
 @patch
