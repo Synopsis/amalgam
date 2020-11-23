@@ -243,6 +243,7 @@ def plot_label_confidence(self:ClassificationInterpretationEx, bins:int=5, fig_w
     if return_fig: return fig
 
 # Cell
+from fastai_amalgam.utils import *
 @patch
 def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, largest=True,
                          font_path=None, font_size=12, use_dedicated_layout=True) -> PIL.Image.Image:
@@ -277,7 +278,6 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
     results = []
     for x, truth, preds, preds_raw, loss in zip(*plot_items):
         if self.is_multilabel:
-            truth = ';'.join(truth)
             preds = preds[0]
         probs_i = np.array([self.dl.vocab.o2i[o] for o in preds])
         pred2prob = [f"{pred} ({round(prob.item()*100,2)}%)" for pred,prob in zip(preds,preds_raw[probs_i])]
@@ -285,12 +285,10 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
             # draw loss at the bottom, preds on top-right
             # and truths on the top
             img = PILImage.create(x)
-            top = []
-            top.append("TRUTH: ")
-            top.append(truth)
+            truth.insert(0, "TRUTH: ")
             pred2prob.insert(0, 'PREDS: ')
             loss_text = f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}"
-            img.draw_labels(top,     location="top-left", font_size=font_size, font_path=font_path)
+            img.draw_labels(truth,     location="top-left", font_size=font_size, font_path=font_path)
             img.draw_labels(pred2prob, location="top-right", font_size=font_size, font_path=font_path)
             img.draw_labels(loss_text, location="bottom", font_size=font_size, font_path=font_path)
             results.append(img)
@@ -304,8 +302,6 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, larg
             out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
             results.append(draw_label(x, out))
     return make_img_grid(results, img_size=None, ncol=ncol)
-    #for img,truth,pred_labels,preds_raw,loss in zip(x,y,)
-
 # Cell
 import sklearn.metrics as skm
 @patch
