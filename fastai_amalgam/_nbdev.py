@@ -54,7 +54,8 @@ index = {"is_3dlut_row": "augment_PIL-img_filters.ipynb",
          "img2arraylike": "utils.ipynb",
          "make_img_grid": "utils.ipynb",
          "PIL.Image.Image.draw_labels": "utils.ipynb",
-         "color": "utils.ipynb"}
+         "color": "utils.ipynb",
+         "ClassificationInterpretationEx.plot_lowest_losses_grid": "interpret_classification-interpretation.ipynb"}
 
 modules = ["augment/pil_filters.py",
            "augment/albumentations.py",

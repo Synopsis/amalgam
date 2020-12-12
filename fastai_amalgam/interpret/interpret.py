@@ -305,6 +305,14 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4,
     return make_img_grid(results, img_size=None, ncol=ncol)
 
 # Cell
+@patch
+@delegates(to=ClassificationInterpretationEx.plot_top_losses_grid, but=['largest'])
+def plot_lowest_losses_grid(self:ClassificationInterpretationEx, **kwargs):
+    """Plot the lowest losses. Exact opposite of `ClassificationInterpretationEx.plot_top_losses`
+    """
+    return self.plot_top_losses_grid(largest=False, **kwargs)
+
+# Cell
 import sklearn.metrics as skm
 @patch
 def print_classification_report(self:ClassificationInterpretationEx, as_dict=False):
