@@ -310,7 +310,7 @@ def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, __la
 def plot_lowest_losses_grid(self:ClassificationInterpretationEx, **kwargs):
     """Plot the lowest losses. Exact opposite of `ClassificationInterpretationEx.plot_top_losses`
     """
-    return self.plot_top_losses_grid(largest=False, **kwargs)
+    return self.plot_top_losses_grid(__largest=False, **kwargs)
 
 # Cell
 import sklearn.metrics as skm
