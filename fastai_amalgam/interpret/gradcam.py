@@ -156,7 +156,7 @@ def gradcam(self: Learner,
             item: Union[PILImage, os.PathLike],
             target_layer: Union[nn.Module, Callable, None] = None,
             labels: Union[str,List[str], int,List[int], None] = None,
-            show_original=False, img_size=None, alpha=0.5,
+            full_size=False, show_original=False, img_size=None, alpha=0.5,
             cmap = RdYlBu_10_r.mpl_colormap,
             font_path=None, font_size=None, grid_ncol=4,
             **kwargs
@@ -193,7 +193,7 @@ def gradcam(self: Learner,
         grads, acts, preds, _label = compute_gcam_items(self, x, label, target_layer)
         gcams[label] = compute_gcam_map(grads, acts)
         preds_dict = {l:pred for pred,l in zip(preds, self.dls.vocab)}
-        pred_img = plot_gcam(self, img, x, gcams[label], alpha=alpha, cmap=cmap)
+        pred_img = plot_gcam(self, img, x, gcams[label], full_size=full_size, alpha=alpha, cmap=cmap)
         pred_img.draw_labels(f"{_label}: {preds_dict[_label]* 100:.02f}%",
                              font_path=font_path, font_size=font_size, location="top")
         results.append(pred_img)
