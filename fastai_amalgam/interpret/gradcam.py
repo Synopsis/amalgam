@@ -123,27 +123,27 @@ def plt2pil(fig) -> PIL.Image.Image:
     plt.close('all')
     return pil_img
 
-def plt_decoded(learn, x, ctx):
+def plt_decoded(learn, x, ctx, cmap=None):
     'Processed tensor --> plottable image, return `extent`'
     x_decoded = TensorImage(learn.dls.train.decode((x,))[0][0])
     extent = (0, x_decoded.shape[1], x_decoded.shape[2], 0)
-    x_decoded.show(ctx=ctx)
+    x_decoded.show(ctx=ctx, cmap=cmap)
     return extent
 
 def plot_gcam(learn, img:PILImage, x:tensor, gcam_map:tensor,
               full_size=True, alpha=0.6, dpi=100,
-              interpolation='bilinear', cmap='magma', **kwargs):
+              interpolation='bilinear', cmap=None, gcam_cmap='magma', **kwargs):
     'Plot the `gcam_map` over `img`'
     fig,ax = plt.subplots(dpi=dpi, **kwargs)
     if full_size:
         extent = (0, img.width,img.height, 0)
-        show_image(img, ctx=ax)
+        show_image(img, ctx=ax, cmap=cmap)
     else:
-        extent = plt_decoded(learn, x, ax)
+        extent = plt_decoded(learn, x, ax, cmap=cmap)
 
     show_image(gcam_map.detach().cpu(), ctx=ax,
                alpha=alpha, extent=extent,
-               interpolation=interpolation, cmap=cmap)
+               interpolation=interpolation, cmap=gcam_cmap)
 
     return plt2pil(fig)
 
@@ -156,8 +156,9 @@ def gradcam(self: Learner,
             item: Union[PILImage, os.PathLike],
             target_layer: Union[nn.Module, Callable, None] = None,
             labels: Union[str,List[str], int,List[int], None] = None,
-            show_original=False, img_size=None, alpha=0.5,
-            cmap = RdYlBu_10_r.mpl_colormap,
+            full_size=False, show_original=False, img_size=None, alpha=0.5,
+            cmap = None,
+            gcam_cmap = RdYlBu_10_r.mpl_colormap,
             font_path=None, font_size=None, grid_ncol=4,
             **kwargs
            ):
@@ -193,7 +194,7 @@ def gradcam(self: Learner,
         grads, acts, preds, _label = compute_gcam_items(self, x, label, target_layer)
         gcams[label] = compute_gcam_map(grads, acts)
         preds_dict = {l:pred for pred,l in zip(preds, self.dls.vocab)}
-        pred_img = plot_gcam(self, img, x, gcams[label], alpha=alpha, cmap=cmap)
+        pred_img = plot_gcam(self, img, x, gcams[label], full_size=full_size, alpha=alpha, cmap=cmap, gcam_cmap=gcam_cmap)
         pred_img.draw_labels(f"{_label}: {preds_dict[_label]* 100:.02f}%",
                              font_path=font_path, font_size=font_size, location="top")
         results.append(pred_img)
