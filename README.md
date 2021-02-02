@@ -1,10 +1,13 @@
+## NOTE
+This library is currently undergoing some significant changes under the hood. The documentation is outdated and the package name on PyPI will also change once the documentation is updated. The interface, however, should remain largely the same 
+
 # FastAI2 Extensions
 > This library is a collection of utility functions for a variety of purposes that fit right into the `fastai2` ecosystem. It's broadly divided into 3 modules -- _interpret_ , _augment_ , and _inference_ . 
 
 
 ## Install
 
-`pip install fastai2_extensions`
+`pip install fastai-amalgam`
 
 ## Interpretation
 
