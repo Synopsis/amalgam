@@ -15,3 +15,5 @@
       - `K.augmentation.RandomFisheye`
       - `K.augmentation.RandomEqualize`
     - `RandomInvertLazy` - A variant of `K.augmentation.RandomInvert` that computes `max_val` dynamically (helpful if inputs are not normalised, like in YOLOX models)
+
+- Delete `fastai_amalgam.albumentations`. Will only be supporting `kornia` moving forward
