@@ -17,3 +17,5 @@
     - `RandomInvertLazy` - A variant of `K.augmentation.RandomInvert` that computes `max_val` dynamically (helpful if inputs are not normalised, like in YOLOX models)
 
 - Delete `fastai_amalgam.albumentations`. Will only be supporting `kornia` moving forward
+
+- Update `fastai_amalgam.export.onnx` for newer ONNX versions (>= ...?); use `onnxsim` for simplifying / optimising model
