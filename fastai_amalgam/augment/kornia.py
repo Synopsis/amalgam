@@ -228,7 +228,7 @@ class RandomInvertLazy(K.augmentation.RandomInvert):
     ) -> None:
         max_val = None
         super().__init__(max_val, return_transform, same_on_batch, p, keepdim)
-        del self.flags
+        self.flags = dict(max_val="<dynamic>")
 
     def apply_transform(
         self,
