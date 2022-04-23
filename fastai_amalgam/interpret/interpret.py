@@ -3,6 +3,7 @@
 __all__ = ["ClassificationInterpretationEx"]
 
 # Cell
+from typing_extensions import Literal
 from fastai.vision.all import *
 from fastai.metrics import *
 import PIL
@@ -54,7 +55,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.is_multilabel = True
             self.thresh = self.dl.loss_func.thresh
 
-    def compute_label_confidence(self, df_colname: Optional[str] = "fnames"):
+    def compute_label_confidence(self, df_colname: Optional[str] = "filepath"):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
@@ -91,6 +92,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self._preds_collated, columns=["fname", "truth", *self.dl.vocab]
         )
         self.preds_df.insert(2, column="loss", value=self.losses.numpy())
+        self.preds_df.insert(2, column="predicted_label", value=self.get_pred_labels())
 
         if self.is_multilabel:
             return  # preds_df_each doesnt make sense for multi-label
@@ -114,10 +116,18 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
 
+    def get_pred_labels(self) -> list:
+        if self.is_multilabel:
+            pred_idxs = list(map(lambda x: torch.where(x == 1)[0], self.decoded))
+            pred_labels = list(map(lambda i: self.vocab[i], pred_idxs))
+            return pred_labels
+        else:
+            return self.vocab[self.decoded]
+
     def get_fnames(
         self,
         label: str,
-        mode: ("accurate", "inaccurate"),
+        mode: Literal["accurate", "inaccurate"],
         conf_level: Union[int, float, tuple],
     ) -> np.ndarray:
         """
