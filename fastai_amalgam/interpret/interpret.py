@@ -4,13 +4,14 @@ __all__ = ["ClassificationInterpretationEx"]
 
 # Cell
 from typing_extensions import Literal
+from typing import *
 from fastai.vision.all import *
 from fastai.metrics import *
 import PIL
 
 # Cell
-from ..utils import *
-from ..show_data import *
+from fastai_amalgam.utils import *
+from fastai_amalgam.show_data import *
 
 # Cell
 import fastai
@@ -55,49 +56,51 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         elif self.targs[0].__class__ == fastai.torch_core.TensorMultiCategory:
             self.is_multilabel = True
             self.thresh = self.dl.loss_func.thresh
-            is_binary_classifier = True if len(self.vocab) == 1 else False
+            self.is_binary_classifier = True if len(self.vocab) == 1 else False
 
-    def compute_label_confidence(self, df_colname: Optional[str] = "filepath"):
+    def compute_label_confidence(self, df_file_src_colname: Optional[str] = "filepath"):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
         `self.preds_df` and `self.preds_df_each`
 
         If the `DataLoaders` is constructed from a `pd.DataFrame`, use
-        `df_colname` to specify the column name with the filepaths
+        `df_file_src_colname` to specify the column name with the filepaths
         """
-        if not isinstance(self.dl.items, pd.DataFrame):
-            self._preds_collated = [
-                # (item, self.dl.vocab[label_idx], *preds.numpy()*100)\
-                (
-                    item,
-                    _get_truths(self.dl.vocab, label_idx, self.is_multilabel),
-                    *preds.numpy() * 100,
-                )
-                for item, label_idx, preds in zip(self.dl.items, self.targs, self.preds)
-            ]
-        ## need to extract fname from DataFrame
-        elif isinstance(self.dl.items, pd.DataFrame):
-            self._preds_collated = [
-                # (item[df_colname], self.dl.vocab[label_idx], *preds.numpy()*100)\
-                (
-                    item[df_colname],
-                    _get_truths(self.dl.vocab, label_idx, self.is_multilabel),
-                    *preds.numpy() * 100,
-                )
-                for (_, item), label_idx, preds in zip(
-                    self.dl.items.iterrows(), self.targs, self.preds
-                )
-            ]
 
-        self.preds_df = pd.DataFrame(
-            self._preds_collated, columns=["fname", "truth", *self.dl.vocab]
+        is_src_dataframe = isinstance(self.dl.items, pd.DataFrame)
+        data_items = (
+            self.dl.items.iterrows() if is_src_dataframe else enumerate(self.dl.items)
         )
-        self.preds_df.insert(2, column="loss", value=self.losses.numpy())
-        self.preds_df.insert(2, column="predicted_label", value=self.get_pred_labels())
+
+        rows = []
+        for (_, item), label_idx, preds in zip(data_items, self.targs, self.preds):
+            row = (
+                item[df_file_src_colname] if is_src_dataframe else item,
+                _get_truths(self.dl.vocab, label_idx, self.is_multilabel),
+                *preds.numpy() * 100,
+            )
+            rows += [row]
+
+        df = pd.DataFrame(rows, columns=["fname", "truth", *self.dl.vocab])
+        df.insert(2, "loss", self.losses.numpy())
+        df.insert(2, "predicted_label", self.get_pred_labels())
+
+        # Store all predictions as a string if binary classifier
+        if self.is_binary_classifier:
+            df.loc[:, "predicted_label"] = df["predicted_label"].apply(
+                lambda x: "" if x == [] else x[0]
+            )
+
+        # Store all labels as a tuple of strings to play nicer with pandas
+        elif self.is_multilabel:
+            df.loc[:, "predicted_label"] = df["predicted_label"].apply(tuple)
+
+        self.preds_df = df
 
         if self.is_multilabel:
             return  # preds_df_each doesnt make sense for multi-label
+
         self._preds_df_each = {
             l: self.preds_df.copy()[self.preds_df.truth == l].reset_index(drop=True)
             for l in self.dl.vocab
@@ -118,7 +121,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
 
-    def get_pred_labels(self) -> list:
+    def get_pred_labels(self) -> Union[List[str], str]:
         if self.is_multilabel:
             pred_idxs = list(map(lambda x: torch.where(x == 1)[0], self.decoded))
             pred_labels = list(map(lambda i: self.vocab[i], pred_idxs))
@@ -179,7 +182,7 @@ def plot_confusion_matrix(
     of `return_fig`, to be able to save the image to disk and a
     different default colormap
     """
-    if self.is_multilabel:
+    if self.is_multilabel or self.is_binary_classifier:
         raise NotImplementedError(
             f"Confusion matrices for multi-label problems aren't implemented"
         )
@@ -345,10 +348,6 @@ def plot_label_confidence(
     plt.tight_layout()
     if return_fig:
         return fig
-
-
-# Cell
-from ..utils import *
 
 
 @patch
