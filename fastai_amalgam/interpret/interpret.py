@@ -2,19 +2,19 @@
 
 __all__ = ["ClassificationInterpretationEx"]
 
-# Cell
-from typing_extensions import Literal
+
 from typing import *
-from fastai.vision.all import *
-from fastai.metrics import *
+
+import fastai
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import PIL
 
-# Cell
-from fastai_amalgam.utils import *
+from fastai.metrics import *
+from fastai.vision.all import *
 from fastai_amalgam.show_data import *
-
-# Cell
-import fastai
+from fastai_amalgam.utils import *
+from typing_extensions import Literal
 
 
 class ClassificationInterpretationEx(ClassificationInterpretation):
@@ -60,7 +60,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
 
             # If binary classifier, store label as a string
             if self.is_binary_classifier:
-                label = "" if label == [] else label[0]
+                # HACK: We should know the exact datatype here...
+                label = "" if (label == [] or label == ()) else label[0]
         else:
             label = vocab[label_idx]
 
@@ -248,56 +249,114 @@ def plot_confusion_matrix(
         return fig
 
 
-# Cell
 @patch
 def plot_accuracy(
     self: ClassificationInterpretationEx,
-    width=0.9,
-    figsize=(6, 6),
-    return_fig=False,
-    title="Accuracy Per Label",
-    ylabel="Accuracy (%)",
-    style: Optional[str] = None,
-    color="#2a467e",
-    vertical_labels=True,
-):
-    "Plot a bar plot showing accuracy per label"
-    if not hasattr(self, "preds_df_each"):
-        raise NotImplementedError
-    if style:
-        plt.style.use(style)
-    if not hasattr(self, "preds_df_each"):
-        self.compute_label_confidence()
-    self.accuracy_dict = defaultdict()
+    thresh: float = 0.9,
+    markers: Optional[List[float]] = [0.25, 0.5, 0.75],
+    marker_color: str = "#D4D2CB",
+    dpi=100,
+    title: Optional[str] = None,
+    ignore_labels_below_n_samples: Optional[int] = None,
+) -> mpl.figure.Figure:
+    """
+    Plots accuracy _per label_.
+    """
 
-    for label, df in self.preds_df_each.items():
-        total = len(df["accurate"]) + len(df["inaccurate"])
-        self.accuracy_dict[label] = 100 * len(df["accurate"]) / total
+    markers = markers or []
+    if self.is_multilabel or self.is_binary_classifier:
+        self.decoded = self.preds > thresh
 
-    fig, ax = plt.subplots(figsize=figsize)
+    """
+    Generate classification report and clean it up by removing aggregate metrics
+    and maybe also labels with fewer samples
+    """
 
-    x = self.accuracy_dict.keys()
-    y = [v for k, v in self.accuracy_dict.items()]
+    report = self.print_classification_report(as_dict=True)
+    label_report = deepcopy(report)
 
-    rects = ax.bar(x, y, width, color=color)
-    for rect in rects:
-        ht = rect.get_height()
-        ax.annotate(
-            s=f"{ht:.02f}",
-            xy=(rect.get_x() + rect.get_width() / 2, ht),
-            xytext=(0, 3),  # offset vertically by 3 points
-            textcoords="offset points",
-            ha="center",
-            va="bottom",
+    # Remove aggregate metrics, only keep individual labels' metrics
+    for k in report.keys():
+        if k.endswith(" avg") or k == "accuracy":
+            del label_report[k]
+
+    # Don't plot samples below `ignore_labels_below_n_samples` samples
+    if ignore_labels_below_n_samples is not None:
+        report = deepcopy(label_report)
+        for k, v in report.items():
+            if v["support"] < ignore_labels_below_n_samples:
+                del label_report[k]
+
+    #
+    """
+    Transform classification report to have the exact values that we will plot
+    """
+
+    if self.is_binary_classifier:
+
+        def compare_gt_with_preds_exact(row: pd.Series) -> bool:
+            return row.truth == row.predicted_label
+
+        label_report = pd.DataFrame(
+            {
+                "label": label_report.keys(),
+                # "accuracy": L(binary_acc(self)),
+                "accuracy": L(
+                    self.preds_df.apply(compare_gt_with_preds_exact, axis=1).mean()
+                ),
+            }
         )
-    ax.set_ybound(lower=0, upper=100)
-    ax.set_yticks(np.arange(0, 110, 10))
-    ax.set_ylabel(ylabel)
-    ax.set_xticklabels(x, rotation="vertical" if vertical_labels else "horizontal")
-    plt.suptitle(title)
-    plt.tight_layout()
-    if return_fig:
-        return fig
+
+    # Multi Label Sigmoid Classifier
+    elif self.is_multilabel:
+        label_report = pd.DataFrame(
+            {
+                "label": label_report.keys(),
+                "recall": L(label_report.values()).itemgot("recall"),
+                "precision": L(label_report.values()).itemgot("precision"),
+                "f1-score": L(label_report.values()).itemgot("f1-score"),
+            }
+        )
+
+    # Single Label Softmax Classifier
+    else:
+        label_report = pd.DataFrame(
+            {
+                "label": label_report.keys(),
+                "accuracy": L(label_report.values()).itemgot("recall"),
+            }
+        )
+    label_report = label_report.iloc[::-1]
+
+    #
+    """
+    Plot stuff
+    """
+
+    fig, ax = plt.subplots(dpi=dpi)
+    width_factor = 2 if self.is_multilabel else 0.75
+    label_report.plot(
+        ax=ax,
+        kind="barh",
+        x="label",
+        figsize=(6, width_factor * len(self.vocab)),
+        xticks=np.arange(0, 1.01, 0.1),
+        # colormap=Oranges_3.mpl_colormap
+    )
+
+    default_title = (
+        f"Metrics @ Thresh={thresh}"
+        if self.is_binary_classifier or self.is_multilabel
+        else "Metrics"
+    )
+    ax.set_title(title or default_title)
+
+    for marker in markers:
+        ax.axvline(marker, linestyle="--", color=marker_color, linewidth=0.7)
+
+    plt.tight_layout(pad=0.1)
+
+    return fig
 
 
 # Cell
