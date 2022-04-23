@@ -39,21 +39,23 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
     def __init__(self, dl, inputs, preds, targs, decoded, losses):
         super().__init__(dl, inputs, preds, targs, decoded, losses)
         self.vocab = self.dl.vocab
+
+        # I forget why this is required.
         if is_listy(self.vocab):
             self.vocab = self.vocab[-1]
-        if self.targs.__class__ == fastai.torch_core.TensorMultiCategory:
-            self.is_multilabel = True
-        else:
-            self.is_multilabel = False
-        self.compute_label_confidence()
+
         self.determine_classifier_type()
+        self.compute_label_confidence()
 
     def determine_classifier_type(self):
         if self.targs[0].__class__ == fastai.torch_core.TensorCategory:
             self.is_multilabel = False
-        if self.targs[0].__class__ == fastai.torch_core.TensorMultiCategory:
+            self.is_binary_classifier = False
+
+        elif self.targs[0].__class__ == fastai.torch_core.TensorMultiCategory:
             self.is_multilabel = True
             self.thresh = self.dl.loss_func.thresh
+            is_binary_classifier = True if len(self.vocab) == 1 else False
 
     def compute_label_confidence(self, df_colname: Optional[str] = "filepath"):
         """
