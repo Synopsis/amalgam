@@ -17,13 +17,6 @@ from fastai_amalgam.show_data import *
 import fastai
 
 
-def _get_truths(vocab, label_idx, is_multilabel):
-    if is_multilabel:
-        return ";".join([vocab[i] for i in torch.where(label_idx == 1)][0])
-    else:
-        return vocab[label_idx]
-
-
 class ClassificationInterpretationEx(ClassificationInterpretation):
     """
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
@@ -58,6 +51,21 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.thresh = self.dl.loss_func.thresh
             self.is_binary_classifier = True if len(self.vocab) == 1 else False
 
+    def _get_truths(self, label_idx) -> Union[Tuple[str], str]:
+        vocab = self.dl.vocab
+
+        # If multilabel, store truths as a tuple of strings
+        if self.is_multilabel or self.is_binary_classifier:
+            label = tuple([vocab[i] for i in torch.where(label_idx == 1)][0])
+
+            # If binary classifier, store label as a string
+            if self.is_binary_classifier:
+                label = "" if label == [] else label[0]
+        else:
+            label = vocab[label_idx]
+
+        return label
+
     def compute_label_confidence(self, df_file_src_colname: Optional[str] = "filepath"):
         """
         Collate prediction confidence, filenames, and ground truth labels
@@ -77,7 +85,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         for (_, item), label_idx, preds in zip(data_items, self.targs, self.preds):
             row = (
                 item[df_file_src_colname] if is_src_dataframe else item,
-                _get_truths(self.dl.vocab, label_idx, self.is_multilabel),
+                self._get_truths(label_idx),
                 *preds.numpy() * 100,
             )
             rows += [row]
@@ -156,6 +164,23 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             if isinstance(conf_level, (int, float)):
                 filt = df[label] < conf_level
         return df[filt].fname.values
+
+    def print_classification_report(self, as_dict=False):
+        "Get scikit-learn classification report"
+        import sklearn.metrics as skm
+
+        # `flatten_check` and `skm.classification_report` don't play
+        # nice together for multi-label
+        # d,t = flatten_check(self.decoded, self.targs)
+
+        d, t = self.decoded, self.targs
+        return skm.classification_report(
+            t,
+            d,
+            labels=list(self.vocab.o2i.values()),
+            target_names=[str(v) for v in self.vocab],
+            output_dict=as_dict,
+        )
 
 
 # Cell
@@ -457,32 +482,3 @@ def plot_top_losses_grid(
 def plot_lowest_losses_grid(self: ClassificationInterpretationEx, **kwargs):
     """Plot the lowest losses. Exact opposite of `ClassificationInterpretationEx.plot_top_losses`"""
     return self.plot_top_losses_grid(__largest=False, **kwargs)
-
-
-# Cell
-import sklearn.metrics as skm
-
-
-@patch
-def print_classification_report(self: ClassificationInterpretationEx, as_dict=False):
-    "Get scikit-learn classification report"
-    # `flatten_check` and `skm.classification_report` don't play
-    # nice together for multi-label
-    # d,t = flatten_check(self.decoded, self.targs)
-    d, t = self.decoded, self.targs
-    if as_dict:
-        return skm.classification_report(
-            t,
-            d,
-            labels=list(self.vocab.o2i.values()),
-            target_names=[str(v) for v in self.vocab],
-            output_dict=True,
-        )
-    else:
-        return skm.classification_report(
-            t,
-            d,
-            labels=list(self.vocab.o2i.values()),
-            target_names=[str(v) for v in self.vocab],
-            output_dict=False,
-        )
