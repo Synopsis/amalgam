@@ -42,6 +42,12 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         self.compute_label_confidence()
 
     def determine_classifier_type(self):
+        """
+        Determines if the classifier is either:
+        1. A single-label softmax classifier
+        2. A multi-label sigmoid classifier
+        3. A (single-label) binary classifier
+        """
         if self.targs[0].__class__ == fastai.torch_core.TensorCategory:
             self.is_multilabel = False
             self.is_binary_classifier = False
@@ -52,6 +58,9 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.is_binary_classifier = True if len(self.vocab) == 1 else False
 
     def _get_truths(self, label_idx) -> Union[Tuple[str], str]:
+        """
+        Fetches the string label from `self.vocab` based on the `label_idx`
+        """
         vocab = self.dl.vocab
 
         # If multilabel, store truths as a tuple of strings
@@ -93,7 +102,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
 
         df = pd.DataFrame(rows, columns=["fname", "truth", *self.dl.vocab])
         df.insert(2, "loss", self.losses.numpy())
-        df.insert(2, "predicted_label", self.get_pred_labels())
+        df.insert(2, "predicted_label", self._get_pred_labels())
 
         # Store all predictions as a string if binary classifier
         if self.is_binary_classifier:
@@ -130,7 +139,10 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
 
-    def get_pred_labels(self) -> Union[List[str], str]:
+    def _get_pred_labels(self) -> Union[List[str], str]:
+        """
+        Gets strings of predicted labels to store inside `self.preds_df`
+        """
         if self.is_multilabel:
             pred_idxs = list(map(lambda x: torch.where(x == 1)[0], self.decoded))
             pred_labels = list(map(lambda i: self.vocab[i], pred_idxs))
@@ -138,6 +150,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         else:
             return self.vocab[self.decoded]
 
+    # TODO: May be deprecated
     def get_fnames(
         self,
         label: str,
@@ -203,11 +216,14 @@ def plot_confusion_matrix(
 ):
     """
     Plot the confusion matrix
+    """
 
+    """
     A near exact replica of fastai's method, with the added option
     of `return_fig`, to be able to save the image to disk and a
     different default colormap
     """
+
     if self.is_multilabel or self.is_binary_classifier:
         raise NotImplementedError(
             f"Confusion matrices for multi-label problems aren't implemented"
