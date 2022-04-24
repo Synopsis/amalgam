@@ -117,6 +117,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         `df_file_src_colname` to specify the column name with the filepaths
         """
 
+        self.src_colname = df_file_src_colname
+
         is_src_dataframe = isinstance(self.dl.items, pd.DataFrame)
         data_items = (
             self.dl.items.iterrows() if is_src_dataframe else enumerate(self.dl.items)
@@ -131,7 +133,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             )
             rows += [row]
 
-        df = pd.DataFrame(rows, columns=["fname", "truth", *self.dl.vocab])
+        df = pd.DataFrame(rows, columns=["filepath", "truth", *self.dl.vocab])
         df.insert(2, "loss", self.losses.numpy())
         df.insert(2, "predicted_label", self._get_pred_labels())
 
@@ -169,6 +171,31 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
             self.preds_df_each[label]['inaccurate'] = sort_desc(self.preds_df_each[label]['inaccurate'], label)
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
+
+    def visualise_row(self, row: pd.Series):
+        """
+        Visualise a row from `self.preds_df`
+        Shows loss, predicted label (with confidence) and ground truth
+        """
+
+        from upyog.all import Visualiser
+
+        vis = Visualiser(Image.open(row[self.src_colname]).convert("RGB"))
+
+        # FIXME
+        vis.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
+
+        try:
+            conf = f"({round(row[row.predicted_label], 2)} %)"
+        except:
+            conf = ""
+        vis.draw_text(
+            f"PREDICTION: {row.predicted_label} {conf}", "top_right", font_border=True
+        )
+        vis.draw_text(f"TRUTH: {row.truth}", "top_left", font_border=True)
+        vis.draw_text(f"LOSS: {round(row.loss, 4)}", "bottom_center", font_border=True)
+
+        return vis.img
 
     def _get_pred_labels(self) -> Union[List[str], str]:
         """
@@ -482,104 +509,79 @@ def plot_label_confidence(
 
 
 @patch
-def plot_top_losses_grid(
+def _plot_losses(
     self: ClassificationInterpretationEx,
-    k=16,
-    ncol=4,
-    __largest=True,
-    font_path=None,
-    font_size=12,
-    use_dedicated_layout=True,
-) -> PIL.Image.Image:
-    """Plot top losses in a grid
+    lowest: bool = True,
+    N: int = 9,
+    ncol: int = 3,
+    per_class: bool = True,
+    font_size: int = 12,
+) -> Image.Image:
+    ""
+    from upyog.all import Visualiser, make_img_grid, img_join_vertical
 
-    Uses fastai'a `ClassificationInterpretation.plot_top_losses` to fetch
-    predictions, and makes a grid with the ground truth labels, predictions,
-    prediction confidence and loss ingrained into the image
+    def make_grid(subset: pd.DataFrame):
+        return make_img_grid(
+            imgs=[self.visualise_row(row) for _, row in subset.iterrows()],
+            ncol=ncol,
+        )
 
-    By default, `use_dedicated_layout` is used to plot the loss (bottom),
-    truths (top-left), and predictions (top-right) in dedicated areas of the
-    image. If this is set to `False`, everything is printed at the bottom of the
-    image
-    """
-    # all of the pred fetching code is copied over from
-    # fastai's `ClassificationInterpretation.plot_top_losses`
-    # and only plotting code is added here
-    losses, idx = self.top_losses(k, largest=__largest)
-    if not isinstance(self.inputs, tuple):
-        self.inputs = (self.inputs,)
-    if isinstance(self.inputs[0], Tensor):
-        inps = tuple(o[idx] for o in self.inputs)
+    # NOTE: Potentially expensive, but safe and convenient.
+    df = self.preds_df.copy()
+
+    if per_class:
+        group = df.groupby("truth")
+        grids = []
+
+        for label, subset in group:
+            subset = subset.sort_values("loss", ascending=lowest)
+            grid = make_grid(subset.iloc[:9])
+            grid = Visualiser(grid)
+
+            # FIXME
+            grid.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
+            # grid.caption(label if isinstance(label,str) else "")
+            grids += [grid.img]
+
+        return img_join_vertical(grids)
+
     else:
-        inps = self.dl.create_batch(
-            self.dl.before_batch([tuple(o[i] for o in self.inputs) for i in idx])
-        )
-    b = inps + tuple(
-        o[idx] for o in (self.targs if is_listy(self.targs) else (self.targs,))
-    )
-    x, y, its = self.dl._pre_show_batch(b, max_n=k)
-    b_out = inps + tuple(
-        o[idx] for o in (self.decoded if is_listy(self.decoded) else (self.decoded,))
-    )
-    x1, y1, outs = self.dl._pre_show_batch(b_out, max_n=k)
-    # if its is not None:
-    #    _plot_top_losses(x, y, its, outs.itemgot(slice(len(inps), None)), self.preds[idx], losses,  **kwargs)
-    plot_items = (
-        its.itemgot(0),
-        its.itemgot(1),
-        outs.itemgot(slice(len(inps), None)),
-        self.preds[idx],
-        losses,
+        df = df.sort_values("loss", ascending=lowest)
+        return make_grid(df.iloc[:9])
+
+
+@patch
+def plot_top_losses(
+    self: ClassificationInterpretationEx,
+    N: int = 9,
+    ncol: int = 3,
+    per_class: bool = True,
+    font_size: int = 12,
+) -> Image.Image:
+    return self._plot_losses(
+        lowest=False,
+        N=N,
+        ncol=ncol,
+        per_class=per_class,
+        font_size=font_size,
     )
 
-    def draw_label(x: TensorImage, labels):
-        return PILImage.create(x).draw_labels(
-            labels, font_path=font_path, font_size=font_size, location="bottom"
-        )
 
-    # return plot_items
-    results = []
-    for x, truth, preds, preds_raw, loss in zip(*plot_items):
-        if self.is_multilabel:
-            preds = preds[0]
-        probs_i = np.array([self.dl.vocab.o2i[o] for o in preds])
-        pred2prob = [
-            f"{pred} ({round(prob.item()*100,2)}%)"
-            for pred, prob in zip(preds, preds_raw[probs_i])
-        ]
-        if use_dedicated_layout:
-            # draw loss at the bottom, preds on top-right
-            # and truths on the top
-            img = PILImage.create(x)
-            if isinstance(truth, Category):
-                truth = [truth]
-            truth.insert(0, "TRUTH: ")
-            pred2prob.insert(0, "PREDS: ")
-            loss_text = f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}"
-            img.draw_labels(
-                truth, location="top-left", font_size=font_size, font_path=font_path
-            )
-            img.draw_labels(
-                pred2prob,
-                location="top-right",
-                font_size=font_size,
-                font_path=font_path,
-            )
-            img.draw_labels(
-                loss_text, location="bottom", font_size=font_size, font_path=font_path
-            )
-            results.append(img)
-        else:
-            # draw everything at the bottom
-            out = []
-            out.append(f"{'TRUTH: '.rjust(8)} {truth}")
-            bsl = "\n"  # since f-strings can't have backslashes
-            out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
-            if self.is_multilabel:
-                out.append("\n")
-            out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
-            results.append(draw_label(x, out))
-    return make_img_grid(results, img_size=None, ncol=ncol)
+@patch
+def plot_lowest_losses(
+    self: ClassificationInterpretationEx,
+    N: int = 9,
+    ncol: int = 3,
+    per_class: bool = True,
+    font_size: int = 12,
+) -> Image.Image:
+    return self._plot_losses(
+        lowest=True,
+        N=N,
+        ncol=ncol,
+        per_class=per_class,
+        font_size=font_size,
+    )
 
 
 @patch
