@@ -582,10 +582,3 @@ def plot_lowest_losses(
         per_class=per_class,
         font_size=font_size,
     )
-
-
-@patch
-@delegates(to=ClassificationInterpretationEx.plot_top_losses_grid, but=["largest"])
-def plot_lowest_losses_grid(self: ClassificationInterpretationEx, **kwargs):
-    """Plot the lowest losses. Exact opposite of `ClassificationInterpretationEx.plot_top_losses`"""
-    return self.plot_top_losses_grid(__largest=False, **kwargs)
