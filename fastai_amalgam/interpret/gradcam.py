@@ -13,6 +13,13 @@ __all__ = [
     "plot_gcam",
 ]
 
+"""
+FIXME:
+* Incorrect type annotations
+* Plot / combine images usine `upyog.Visualiser`
+* Refactor?
+"""
+
 import PIL
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
