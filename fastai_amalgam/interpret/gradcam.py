@@ -3,7 +3,6 @@
 __all__ = [
     "Hook",
     "HookBwd",
-    "to_cuda",
     "get_label_idx",
     "get_target_layer",
     "compute_gcam_items",
@@ -48,10 +47,6 @@ class HookBwd():
     def __enter__(self, *args): return self
     def __exit__ (self, *args): self.hook.remove()
 # fmt: on
-
-
-def to_cuda(*args):
-    [o.cuda() for o in args]
 
 
 def get_label_idx(
@@ -129,13 +124,23 @@ def compute_gcam_items(
     x: TensorImage,
     label: Union[str, int, None] = None,
     target_layer: Union[nn.Module, Callable, None] = None,
+    device: Optional[int] = None,
 ) -> Tuple[Tensor, Tensor, Tensor, str]:
     """Compute gradient and activations of `target_layer` of `learn.model`
     for `x` with respect to `label`.
 
     If `target_layer` is None, then it is set to `learn.model[:-1]`
     """
-    to_cuda(learn.model, x)
+
+    # Credit: Lluís Salord Quetglas: https://github.com/Synopsis/amalgam/pull/5
+    # Incorporated directly by rsomani95 as it was done in the midst of a big refactor.
+    if torch.cuda.is_available():
+        if device:
+            x = x.to(device)
+            learn.model = learn.model.to(device)
+        else:
+            x = x.cuda()
+            learn.model = learn.model.cuda()
     target_layer = get_target_layer(learn, target_layer)
 
     with HookBwd(target_layer) as hook_g:
