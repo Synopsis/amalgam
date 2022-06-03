@@ -44,6 +44,28 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
         self.determine_classifier_type()
         self.compute_label_confidence()
 
+    # Copied from source as is, with the exception that `with_input` is exposed and False
+    # by default as it can consume a LOT of memory if your dataset is large
+    @classmethod
+    def from_learner(
+        cls, learn: Learner, ds_idx=1, dl=None, act=None, with_input=False
+    ):
+        "Construct interpretation object from a learner"
+        if dl is None:
+            dl = learn.dls[ds_idx].new(shuffled=False, drop_last=False)
+
+        return cls(
+            dl,
+            None,
+            *learn.get_preds(
+                dl=dl,
+                with_input=with_input,
+                with_loss=True,
+                with_decoded=True,
+                act=None,
+            ),
+        )
+
     def determine_classifier_type(self):
         """
         Determines if the classifier is either:
