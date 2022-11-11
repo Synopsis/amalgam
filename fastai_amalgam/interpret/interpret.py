@@ -137,13 +137,18 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
         2. A multi-label sigmoid classifier
         3. A (single-label) binary classifier
         """
-        if self.targs[0].__class__ == fastai.torch_core.TensorCategory:
+        # if self.targs[0].__class__ == fastai.torch_core.TensorCategory:
+        if self.targs.ndim == 1:
             self.is_multilabel = False
             self.is_binary_classifier = False
 
-        elif self.targs[0].__class__ == fastai.torch_core.TensorMultiCategory:
+        # elif self.targs[0].__class__ == fastai.torch_core.TensorMultiCategory:
+        elif self.targs.ndim == 2:
             self.is_multilabel = True
             self.is_binary_classifier = True if len(self.vocab) == 1 else False
+
+        else:
+            raise RuntimeError(f"Unable to determine classifier type (softmax | sigmoid)")
 
     @property
     def is_softmax_classifier(self) -> bool:
