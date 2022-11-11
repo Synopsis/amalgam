@@ -7,6 +7,7 @@ import fastai
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import PIL
+import cleanlab
 
 from fastai.metrics import *
 from fastai.vision.all import *
@@ -20,7 +21,59 @@ from typing_extensions import Literal
 logger = logger.opt(colors=True)
 
 
-class ClassificationInterpretationEx(ClassificationInterpretation):
+# fmt: off
+def to_np(x: Tensor) -> np.ndarray:
+    if   isinstance(x, Tensor):     return x.detach().cpu().numpy()
+    elif isinstance(x, np.ndarray): return x
+    else:                           raise TypeError(f"Expected {{array|Tensor}}, got {type(x)} instead")
+# fmt: on
+
+
+class CleanLabMixin:
+    def _get_y_labels(self, y_labels: Union[np.ndarray, Callable, None]):
+        if hasattr(self, "labels"):
+            return self.labels
+
+        if y_labels is not None:
+            if isinstance(y_labels, np.ndarray):
+                labels = y_labels
+            elif inspect.isfunction(y_labels):
+                labels = y_labels(self.dl.items)
+        else:
+            labels = self.dl.items.label.apply(lambda x: self.vocab.o2i[x]).values
+
+        self.labels = labels
+        logger.info(f"Collected and stored ground truth y-labels as `self.labels`")
+
+        return self.labels
+
+    def cleanlab_get_dataset_health(
+        self,
+        y_labels: Union[np.ndarray, Callable, None],
+        verbose: bool = True,
+    ) -> dict:
+        """"""
+        labels = self._get_y_labels(y_labels)
+
+        return cleanlab.dataset.health_summary(
+            labels=to_np(labels),
+            pred_probs=to_np(self.preds),
+            class_names=self.vocab,
+            multi_label=self.is_multilabel,
+            verbose=verbose,
+        )
+
+    def cleanlab_get_label_issues_mask(
+        self, y_labels: Union[np.ndarray, Callable, None]
+    ):
+        return cleanlab.filter.find_label_issues(
+            labels=to_np(self._get_y_labels(y_labels)),
+            pred_probs=to_np(self.preds),
+            multi_label=self.is_multilabel,
+        )
+
+
+class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin):
     """
     Extend fastai2's `ClassificationInterpretation` to analyse model predictions in more depth
     See:
@@ -33,8 +86,11 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
       * self.print_classification_report()
     """
 
+    # NOTE: Since fastai >= 2.5.6, the init signature has changed, but I am hesitant
+    # to update my code as I'm not sure how it's going to break, so I'm instead using
+    # their older init signature and not calling super()
     def __init__(self, dl, inputs, preds, targs, decoded, losses):
-        super().__init__(dl, inputs, preds, targs, decoded, losses)
+        store_attr()
         self.vocab = self.dl.vocab
 
         # I forget why this is required.
@@ -43,6 +99,14 @@ class ClassificationInterpretationEx(ClassificationInterpretation):
 
         self.determine_classifier_type()
         self.compute_label_confidence()
+
+    # NOTE: See note about `__init__` above. Same applies here
+    def confusion_matrix(self):
+        "Confusion matrix as an `np.ndarray`."
+        x = torch.arange(0, len(self.vocab))
+        d,t = flatten_check(self.decoded, self.targs)
+        cm = ((d==x[:,None]) & (t==x[:,None,None])).long().sum(2)
+        return to_np(cm)
 
     # Copied from source as is, with the exception that `with_input` is exposed and False
     # by default as it can consume a LOT of memory if your dataset is large
