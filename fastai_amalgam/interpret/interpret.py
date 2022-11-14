@@ -673,3 +673,64 @@ def plot_lowest_losses(
         per_class=per_class,
         font_size=font_size,
     )
+
+
+@patch
+def plot_top_losses_grid(self:ClassificationInterpretationEx, k=16, ncol=4, __largest=True,
+                         font_path=None, font_size=12, use_dedicated_layout=True) -> PIL.Image.Image:
+    """Plot top losses in a grid
+
+    Uses fastai'a `ClassificationInterpretation.plot_top_losses` to fetch
+    predictions, and makes a grid with the ground truth labels, predictions,
+    prediction confidence and loss ingrained into the image
+
+    By default, `use_dedicated_layout` is used to plot the loss (bottom),
+    truths (top-left), and predictions (top-right) in dedicated areas of the
+    image. If this is set to `False`, everything is printed at the bottom of the
+    image
+    """
+    # all of the pred fetching code is copied over from
+    # fastai's `ClassificationInterpretation.plot_top_losses`
+    # and only plotting code is added here
+    losses,idx = self.top_losses(k, largest=__largest)
+    if not isinstance(self.inputs, tuple): self.inputs = (self.inputs,)
+    if isinstance(self.inputs[0], Tensor): inps = tuple(o[idx] for o in self.inputs)
+    else: inps = self.dl.create_batch(self.dl.before_batch([tuple(o[i] for o in self.inputs) for i in idx]))
+    b = inps + tuple(o[idx] for o in (self.targs if is_listy(self.targs) else (self.targs,)))
+    x,y,its = self.dl._pre_show_batch(b, max_n=k)
+    b_out = inps + tuple(o[idx] for o in (self.decoded if is_listy(self.decoded) else (self.decoded,)))
+    x1,y1,outs = self.dl._pre_show_batch(b_out, max_n=k)
+    #if its is not None:
+    #    _plot_top_losses(x, y, its, outs.itemgot(slice(len(inps), None)), self.preds[idx], losses,  **kwargs)
+    plot_items = its.itemgot(0), its.itemgot(1), outs.itemgot(slice(len(inps), None)), self.preds[idx], losses
+    def draw_label(x:TensorImage, labels):
+        return PILImage.create(x).draw_labels(labels, font_path=font_path, font_size=font_size, location="bottom")
+    # return plot_items
+    results = []
+    for x, truth, preds, preds_raw, loss in zip(*plot_items):
+        if self.is_multilabel:
+            preds = preds[0]
+        probs_i = np.array([self.dl.vocab.o2i[o] for o in preds])
+        pred2prob = [f"{pred} ({round(prob.item()*100,2)}%)" for pred,prob in zip(preds,preds_raw[probs_i])]
+        if use_dedicated_layout:
+            # draw loss at the bottom, preds on top-right
+            # and truths on the top
+            img = PILImage.create(x)
+            if isinstance(truth, Category): truth = [truth]
+            truth.insert(0, "TRUTH: ")
+            pred2prob.insert(0, 'PREDS: ')
+            loss_text = f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}"
+            img.draw_labels(truth,     location="top-left", font_size=font_size, font_path=font_path)
+            img.draw_labels(pred2prob, location="top-right", font_size=font_size, font_path=font_path)
+            img.draw_labels(loss_text, location="bottom", font_size=font_size, font_path=font_path)
+            results.append(img)
+        else:
+            # draw everything at the bottom
+            out = []
+            out.append(f"{'TRUTH: '.rjust(8)} {truth}")
+            bsl = '\n' # since f-strings can't have backslashes
+            out.append(f"{'PRED: '.rjust(8)} {bsl.join(pred2prob)}")
+            if self.is_multilabel: out.append('\n')
+            out.append(f"{'LOSS: '.rjust(8)} {round(loss.item(), 4)}")
+            results.append(draw_label(x, out))
+    return make_img_grid(results, img_size=None, ncol=ncol)
