@@ -198,6 +198,15 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
 
         return label
 
+    # HACK FIXME. This is so ugly...
+    @property
+    def filepath_col(self) -> Union[None, str]:
+        if isinstance(self.dl.items, pd.DataFrame):
+            if "fname" in self.dl.items.columns:
+                return "fname"
+            elif "filepath" in self.dl.items.columns:
+                return "filepath"
+
     def compute_label_confidence(self):
         """
         Collate prediction confidence, filenames, and ground truth labels
@@ -215,13 +224,13 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
         rows = []
         for (_, item), label_idx, preds in zip(data_items, self.targs, self.preds):
             row = (
-                item["filepath"] if is_src_dataframe else item,
+                item[self.filepath_col] if is_src_dataframe else item,
                 self._get_truths(label_idx),
                 *preds.numpy() * 100,
             )
             rows += [row]
 
-        df = pd.DataFrame(rows, columns=["filepath", "truth", *self.dl.vocab])
+        df = pd.DataFrame(rows, columns=[self.filepath_col, "truth", *self.dl.vocab])
         df.insert(2, "loss", self.losses.numpy())
         df.insert(2, "predicted_label", self._get_pred_labels())
 
@@ -268,7 +277,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
 
         from upyog.all import Visualiser
 
-        vis = Visualiser(Image.open(row["filepath"]).convert("RGB"))
+        vis = Visualiser(Image.open(row[self.filepath_col]).convert("RGB"))
 
         # FIXME
         vis.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
@@ -323,7 +332,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
                 filt = df[label].between(*conf_level)
             if isinstance(conf_level, (int, float)):
                 filt = df[label] < conf_level
-        return df[filt].fname.values
+        return df.loc[filt, self.filepath_col].values
 
     def print_classification_report(self, as_dict=False):
         "Get scikit-learn classification report"
