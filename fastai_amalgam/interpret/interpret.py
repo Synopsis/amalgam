@@ -272,7 +272,8 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
 
-    def visualise_row(self, row: pd.Series, font_path = None):
+    # FIXME: Remove font path
+    def visualise_row(self, row: pd.Series, font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"):
         """
         Visualise a row from `self.preds_df`
         Shows loss, predicted label (with confidence) and ground truth
