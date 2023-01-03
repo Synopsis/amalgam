@@ -198,7 +198,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
 
         return label
 
-    def compute_label_confidence(self, df_file_src_colname: Optional[str] = "filepath"):
+    def compute_label_confidence(self):
         """
         Collate prediction confidence, filenames, and ground truth labels
         in DataFrames, and store them as class attributes
@@ -207,9 +207,6 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
         If the `DataLoaders` is constructed from a `pd.DataFrame`, use
         `df_file_src_colname` to specify the column name with the filepaths
         """
-
-        self.src_colname = df_file_src_colname
-
         is_src_dataframe = isinstance(self.dl.items, pd.DataFrame)
         data_items = (
             self.dl.items.iterrows() if is_src_dataframe else enumerate(self.dl.items)
@@ -218,7 +215,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
         rows = []
         for (_, item), label_idx, preds in zip(data_items, self.targs, self.preds):
             row = (
-                item[df_file_src_colname] if is_src_dataframe else item,
+                item["filepath"] if is_src_dataframe else item,
                 self._get_truths(label_idx),
                 *preds.numpy() * 100,
             )
@@ -271,7 +268,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
 
         from upyog.all import Visualiser
 
-        vis = Visualiser(Image.open(row[self.src_colname]).convert("RGB"))
+        vis = Visualiser(Image.open(row["filepath"]).convert("RGB"))
 
         # FIXME
         vis.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
