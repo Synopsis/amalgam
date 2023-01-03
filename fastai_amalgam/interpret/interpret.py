@@ -97,8 +97,20 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
         if is_listy(self.vocab):
             self.vocab = self.vocab[-1]
 
+        self.setup_filepath_col()
         self.determine_classifier_type()
         self.compute_label_confidence()
+
+    def setup_filepath_col(self):
+        if isinstance(self.dl.items, pd.DataFrame):
+            if "fname" in self.dl.items.columns:
+                self.filepath_col = "fname"
+            elif "filepath" in self.dl.items.columns:
+                self.filepath_col = "filepath"
+            else:
+                raise ValueError(f"Please rename the image file column to be either 'file' or 'filepath'")
+        else:
+            self.filepath_col = None
 
     # NOTE: See note about `__init__` above. Same applies here
     def confusion_matrix(self):
@@ -197,15 +209,6 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
             label = vocab[label_idx]
 
         return label
-
-    # HACK FIXME. This is so ugly...
-    @property
-    def filepath_col(self) -> Union[None, str]:
-        if isinstance(self.dl.items, pd.DataFrame):
-            if "fname" in self.dl.items.columns:
-                return "fname"
-            elif "filepath" in self.dl.items.columns:
-                return "filepath"
 
     def compute_label_confidence(self):
         """
