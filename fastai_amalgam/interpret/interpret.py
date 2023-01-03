@@ -272,7 +272,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
             assert len(self.preds_df_each[label]['accurate']) + len(self.preds_df_each[label]['inaccurate']) == len(df)
             # fmt: on
 
-    def visualise_row(self, row: pd.Series):
+    def visualise_row(self, row: pd.Series, font_path = None):
         """
         Visualise a row from `self.preds_df`
         Shows loss, predicted label (with confidence) and ground truth
@@ -280,15 +280,15 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
 
         from upyog.all import Visualiser
 
-        vis = Visualiser(Image.open(row[self.filepath_col]).convert("RGB"))
+        # Total HACK as I'm too tired to figure out the dumb bug
+        try:             img = Image.open(row["fname"])
+        except KeyError: img = Image.open(row["filepath"]) 
 
-        # FIXME
-        vis.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
+        vis = Visualiser(img.convert("RGB"), font_path)
 
-        try:
-            conf = f"({round(row[row.predicted_label], 2)} %)"
-        except:
-            conf = ""
+        try:    conf = f"({round(row[row.predicted_label], 2)} %)"
+        except: conf = ""
+
         vis.draw_text(
             f"PREDICTION: {row.predicted_label} {conf}", "top_right", font_border=True
         )
