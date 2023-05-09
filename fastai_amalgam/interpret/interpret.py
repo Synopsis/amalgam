@@ -1,24 +1,15 @@
 __all__ = ["ClassificationInterpretationEx"]
 
 
-from typing import *
-
-import fastai
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import PIL
-import cleanlab
 
 from fastai.metrics import *
 from fastai.vision.all import *
 from fastai_amalgam.show_data import *
 from fastai_amalgam.utils import *
-from loguru import logger
-from palettable.scientific.sequential import Davos_3_r
-from typing_extensions import Literal
-
-
-logger = logger.opt(colors=True)
+from upyog.all import *
 
 
 # fmt: off
@@ -53,6 +44,7 @@ class CleanLabMixin:
         verbose: bool = True,
     ) -> dict:
         """"""
+        import cleanlab
         labels = self._get_y_labels(y_labels)
 
         return cleanlab.dataset.health_summary(
@@ -66,6 +58,7 @@ class CleanLabMixin:
     def cleanlab_get_label_issues_mask(
         self, y_labels: Union[np.ndarray, Callable, None]
     ):
+        import cleanlab
         return cleanlab.filter.find_label_issues(
             labels=to_np(self._get_y_labels(y_labels)),
             pred_probs=to_np(self.preds),
@@ -378,6 +371,7 @@ def plot_confusion_matrix(
     of `return_fig`, to be able to save the image to disk and a
     different default colormap
     """
+    from palettable.scientific.sequential import Davos_3_r
 
     if self.is_multilabel or self.is_binary_classifier:
         raise NotImplementedError(
