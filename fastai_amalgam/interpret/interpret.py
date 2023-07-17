@@ -266,7 +266,7 @@ class ClassificationInterpretationEx(ClassificationInterpretation, CleanLabMixin
             # fmt: on
 
     # FIXME: Remove font path
-    def visualise_row(self, row: pd.Series, font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"):
+    def visualise_row(self, row: pd.Series, font_path=None):
         """
         Visualise a row from `self.preds_df`
         Shows loss, predicted label (with confidence) and ground truth
@@ -634,7 +634,7 @@ def _plot_losses(
             grid = Visualiser(grid)
 
             # FIXME
-            grid.font_path = "/home/synopsis/git/upyog/assets/fonts/EuroStyleNormal.ttf"
+            grid.font_path = None
             # grid.caption(label if isinstance(label,str) else "")
             grids += [grid.img]
 
